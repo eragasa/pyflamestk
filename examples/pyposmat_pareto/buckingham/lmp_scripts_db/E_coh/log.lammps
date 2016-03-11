@@ -1,0 +1,124 @@
+LAMMPS (10 Feb 2015)
+# ---- initialize simulations
+clear
+units metal
+dimension 3
+boundary p p p
+atom_style atomic
+atom_modify map array
+# ---- create atoms
+print "create box"
+create box
+lattice bcc 3.5
+Lattice spacing in x,y,z = 3.5 3.5 3.5
+region box block 0 1 0 1 0 1 units lattice
+create_box 1 box
+Created orthogonal box = (0 0 0) to (3.5 3.5 3.5)
+  1 by 1 by 1 MPI processor grid
+create_atoms 1 box
+Created 2 atoms
+replicate 1 1 1
+  orthogonal box = (0 0 0) to (3.5 3.5 3.5)
+  1 by 1 by 1 MPI processor grid
+  2 atoms
+print "end create atoms"
+end create atoms
+# ---- define interatomic potential
+pair_style eam/alloy
+pair_coeff * * Ni99.eam.alloy Ni
+neighbor 2.0 bin
+neigh_modify delay 10 check yes
+
+# ---- define settings
+compute eng all pe/atom
+compute eatoms all reduce sum c_eng
+
+# ---- run minimization
+reset_timestep 0
+fix 1 all box/relax iso 0.0 vmax 0.001
+thermo 10
+thermo_style custom step pe lx ly lz press pxx pyy pzz c_eatoms
+min_style cg
+minimize 1e-25 1e-25 5000 10000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:168)
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 7.80375
+Memory usage per processor = 3.41073 Mbytes
+Step PotEng Lx Ly Lz Press Pxx Pyy Pzz eatoms 
+       0   -5.1977592          3.5          3.5          3.5   -354956.66   -354956.66   -354956.66   -354956.66   -5.1977592 
+      10   -5.4740796        3.465        3.465        3.465   -339653.89   -339653.89   -339653.89   -339653.89   -5.4740796 
+      20   -5.7318985         3.43         3.43         3.43   -322282.84   -322282.84   -322282.84   -322282.84   -5.7318985 
+      30   -5.9719474        3.395        3.395        3.395   -307699.01   -307699.01   -307699.01   -307699.01   -5.9719474 
+      40   -6.1991322         3.36         3.36         3.36   -302044.98   -302044.98   -302044.98   -302044.98   -6.1991322 
+      50    -6.422062        3.325        3.325        3.325   -308612.85   -308612.85   -308612.85   -308612.85    -6.422062 
+      60   -6.6475454         3.29         3.29         3.29   -321039.66   -321039.66   -321039.66   -321039.66   -6.6475454 
+      70   -6.8773859        3.255        3.255        3.255   -333295.04   -333295.04   -333295.04   -333295.04   -6.8773859 
+      80   -7.1086619         3.22         3.22         3.22   -338519.09   -338519.09   -338519.09   -338519.09   -7.1086619 
+      90   -7.3350865        3.185        3.185        3.185    -333445.7    -333445.7    -333445.7    -333445.7   -7.3350865 
+     100   -7.5502909         3.15         3.15         3.15   -320169.08   -320169.08   -320169.08   -320169.08   -7.5502909 
+     110   -7.7506388        3.115        3.115        3.115   -302088.01   -302088.01   -302088.01   -302088.01   -7.7506388 
+     120   -7.9337433         3.08         3.08         3.08    -279527.4    -279527.4    -279527.4    -279527.4   -7.9337433 
+     130   -8.0977285        3.045        3.045        3.045   -253443.83   -253443.83   -253443.83   -253443.83   -8.0977285 
+     140   -8.2411243         3.01         3.01         3.01   -223197.13   -223197.13   -223197.13   -223197.13   -8.2411243 
+     150   -8.3625102        2.975        2.975        2.975   -190017.94   -190017.94   -190017.94   -190017.94   -8.3625102 
+     160   -8.4617174         2.94         2.94         2.94   -156296.46   -156296.46   -156296.46   -156296.46   -8.4617174 
+     170   -8.5407599        2.905        2.905        2.905    -126936.4    -126936.4    -126936.4    -126936.4   -8.5407599 
+     180   -8.6032908         2.87         2.87         2.87   -102389.29   -102389.29   -102389.29   -102389.29   -8.6032908 
+     190   -8.6500716        2.835        2.835        2.835   -69746.344   -69746.344   -69746.344   -69746.344   -8.6500716 
+     200   -8.6739643          2.8          2.8          2.8   -20380.126   -20380.126   -20380.126   -20380.126   -8.6739643 
+     208   -8.6760124    2.7863122    2.7863122    2.7863122 -3.3611587e-10 -3.2378134e-10 -3.2275347e-10 -3.618128e-10   -8.6760124 
+Loop time of 0.00906491 on 1 procs for 208 steps with 2 atoms
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+        -5.19775923162     -8.67601238398     -8.67601238398
+  Force two-norm initial, final = 28.4964 2.0496e-14
+  Force max component initial, final = 28.4964 1.71012e-14
+  Final line search alpha, max atom move = 1 1.71012e-14
+  Iterations, force evaluations = 208 213
+
+Pair  time (%) = 0.0039165 (43.2051)
+Neigh time (%) = 2.69413e-05 (0.297204)
+Comm  time (%) = 0.00133967 (14.7787)
+Outpt time (%) = 0.000422001 (4.65532)
+Other time (%) = 0.00335979 (37.0637)
+
+Nlocal:    2 ave 2 max 2 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    557 ave 557 max 557 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    168 ave 168 max 168 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 168
+Ave neighs/atom = 84
+Neighbor list builds = 1
+Dangerous builds = 0
+
+variable natoms equal "count(all)"
+variable tot_energy equal "c_eatoms"
+variable length_x equal "lx"
+variable length_y equal "ly"
+variable length_z equal "lz"
+variable ecoh equal "pe/atoms"
+#variable ecoh equal "v_etotal/v_atoms"
+# --- output
+print "pyPosMat output section"
+pyPosMat output section
+print "tot_energy = ${tot_energy}"
+tot_energy = -8.67601238397885
+print "num_atoms = ${natoms}"
+num_atoms = 2
+print "latt_const_a = ${length_x}"
+latt_const_a = 2.78631220553887
+print "latt_const_b = ${length_y}"
+latt_const_b = 2.78631220553887
+print "latt_const_c = ${length_z}"
+latt_const_c = 2.78631220553887
+print "ecoh = ${ecoh}"
+ecoh = -4.33800619198943
+print "lammps_sim_done"
+lammps_sim_done

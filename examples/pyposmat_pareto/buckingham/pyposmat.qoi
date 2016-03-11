@@ -1,0 +1,11 @@
+# quantities of interest
+qoi_list = MgO_NaCl_press, MgO_NaCl_ecoh
+
+# qoi = <qoi_name, variable, structure_type>
+define_qoi = MgO_NaCl_press, sp_pressure, MgO_NaCl
+define_qoi = MgO_NaCl_ecoh,  sp_ecoh, MgO_NaCl 
+
+# qoi_targets =  <qoi-name>, <target>, <weight>, <norm_factor>
+qoi_target = MgO_NaCl_press,  0.0, 100.0, 1
+qoi_target = MgO_NaCl_ecoh,      0.0, 100.0, 1
+
