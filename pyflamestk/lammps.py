@@ -32,8 +32,6 @@ class Simulation:
   def run(self):
     pass
 
-
-
 class InputFile:
   def __init__(self):
     self.units = "metal"
@@ -113,7 +111,7 @@ class StructureFile:
    def __init__(self):
       self.structure = ""
 
-   def write(self, filename_out, symbol_list):
+   def write(self, filename_out, symbol_list, atom_style):
       print("writing structure to {}".format(filename_out))
       structure = self.structure
       structure = self.structure
@@ -131,6 +129,7 @@ class StructureFile:
       yz                         = structure.h_matrix[1][2]
 
       file = open(filename_out,'w')
+      # TODO: want to add more information such as sc, encoded on this first line.
       file.write("# {}\n".format(symbol_list))
       file.write("\n")
       file.write("{} atoms\n".format(total_number_of_atoms))
@@ -144,14 +143,29 @@ class StructureFile:
       file.write("\n")
       file.write("Atoms\n")
       file.write("\n")
+
+      atom_id = 1
       for i_symbol, symbol in enumerate(symbol_list):
         for i_atom, atom in enumerate(structure.atomList):
           if (atom.symbol == symbol):
-            file.write("{} {} {:10.4f} {:10.4f} {:10.4f}\n".format(i_atom + 1, 
-                                                                   i_symbol + 1, 
-                                                                   structure.h_matrix[0][0]*atom.position[0],\
-                                                                   structure.h_matrix[1][1]*atom.position[1],\
-                                                                   structure.h_matrix[2][2]*atom.position[2]))
+            if atom_style == 'atomic':
+              file.write("{} {} {:10.4f} {:10.4f} {:10.4f}\n".format(atom_id, 
+                                                                     i_symbol + 1, 
+                                                                     structure.h_matrix[0][0]*atom.position[0],\
+                                                                     structure.h_matrix[1][1]*atom.position[1],\
+                                                                     structure.h_matrix[2][2]*atom.position[2]))
+              atom_id += 1
+            elif atom_style == 'charge':
+              #TODO: the style of this file is atom_id, atom_type, charge, x, y, z
+              # a dummy charge of q = 1 is put here, but might neeed to be improved in the future.
+              q = 1
+              file.write("{} {} {:10.4f} {:10.4f} {:10.4f} {:10.4f}\n".format(atom_id, 
+                                                                     i_symbol + 1,
+                                                                     q,
+                                                                     structure.h_matrix[0][0]*atom.position[0],\
+                                                                     structure.h_matrix[1][1]*atom.position[1],\
+                                                                     structure.h_matrix[2][2]*atom.position[2]))
+              atom_id += 1
       file.close()
 
 # various helper functions

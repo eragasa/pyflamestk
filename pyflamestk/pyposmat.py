@@ -1,6 +1,17 @@
 import copy
+import os
 import os.path
+import shutil
+import subprocess
 import numpy as np
+
+import pyflamestk.lammps
+class PyPosmatError(Exception):
+  def __init__(self, value):
+    self.value = value
+
+  def __str__(self):
+    return repr(self.value)
 
 class PyPosmatEngine:
     
@@ -15,28 +26,244 @@ class PyPosmatEngine:
     self.read_configuration_files(fname_config_pyposmat=fname_config_pyposmat,
                                   fname_config_potential=fname_config_potential,
                                   fname_config_qoi=fname_config_qoi)
+                                  
+    # list of class member variables
+    self.qoi = {}
+    self.lammps_sims = {}        #lammps_sims[sim_name]['structure','sim_type']
+    self.potential_parameter_list = []
+    self.potential_parameters = {}
+    self.dir_lammps_sim_db = None
+    
     self.check_lammps_configuration()
     self.check_structure_database()
     self.check_lammps_simulation_templates()
     self.check_external_software()
     self.check_quantities_of_interest()
+    self.determine_lammps_simulations()
     self.check_potential_parameters()
 
+    #self.write_lammps_potential_file()
+
   def evaluate_parameter_set(self, potential_parameters):
-      pass
+      potential_type = 'buckingham'        # TODO: GET RID OF MAGIC VARIABLE
 
-  def write_lammps_potential_file(self):
-      pass
+      fname_potential = None  # initialize, default parameterization requires None
+      fname_eam       = None  # initialize, default parameterization requires None
 
-  def create_lammps_simulation(self):
-      pass
+      fname_potential = 'potential.mod'
+
+      if(potential_type == 'buckingham'):
+          fname_potential = 'potential.mod'
+          self.write_lammps_buckingham_potential_file(potential_params=potential_parameters, 
+                                                      fname_out = fname_potential)
+      elif(potential_type == 'eam'):
+          fname_potential = "potential.mod"
+          fname_eam       = "eam.alloy"
+          self.write_eam_potential_file()
+          self.write_eam_setfl_file()
+      else:
+          msg_err = "unknown potential_type code({})"
+          msg_err = msg_err.format(potential_type)
+          raise ValueError(msg_err)          
+          
+      #self.create_lammps_simulations()
+      for simulation in self.lammps_sims:
+          structure_name = simulation.split('.')[0]
+          sim_code = simulation.split('.')[1]
+          
+          self.lammps_sims[simulation]['structure'] = structure_name
+          
+          if (sim_code == 'sp'):
+              self.lammps_sims[simulation]['sim_type']  = 'single_point'
+          else:
+              msg_err = "unknown sim_type code({})"
+              msg_err = msg_err.format(sim_code)
+              raise ValueError(msg_err)
+
+      for simulation in self.lammps_sims:
+          name_structure  = self.lammps_sims[simulation]['structure']
+          fname_structure = self.structure_db[name_structure]
+          self.create_lammps_simulation(sim_name=simulation,
+                                        fname_structure=fname_structure,
+                                        fname_sim_template=self.lammps_sims[simulation]['sim_type'],
+                                        fname_potential = fname_potential,
+                                        fname_eam = fname_eam)
+
+  def run_all_lammps_simulations(self):
+    #TODO: replace this line with information in the config file.
+    fname_script_run_lammps = "./runsimulation.sh"
+    for dir in self.lammps_sims:
+      print("  ",dir)
+      p = subprocess.Popen(fname_script_run_lammps, shell=True, cwd=dir)
+
+    sims_finished  = False
+    sim_has_error = False
+
+    while not(sims_finished) and not(sim_has_error):
+      sims_finished  = self.check_all_lammps_simulations_done(sim_directories = self.lammps_sims)
+      sim_has_error  = self.check_all_lammps_simulations_for_errors(sim_directories = self.lammps_sims) 
+
+    if(sim_has_error):
+      print("simulation has failed")      
+
+  def check_all_lammps_simulations_done(self, sim_directories):
+    return pyflamestk.lammps.checkAllLammpsSimulationsDone(sim_directories = sim_directories)
+
+  def check_all_lammps_simulations_for_errors(self, sim_directories):
+    return pyflamestk.lammps.checkAllLammpsSimulationsForErrors(sim_directories = sim_directories)
+
+  def determine_lammps_simulations(self):
+      
+      ''' This method determines which lammps simulations are required from
+      the QOI simulation list.'''
+            
+      self.lammps_sims = {}   # initialization
+      print("determining lammps simulations...")
+      for qoi in self.qoi_list:
+          if self.qoi[qoi]['variable'] in ['sp_ecoh', 'sp_pressure']:
+              structure = self.qoi[qoi]['structure'][0]
+              lammps_sim_template = "sp"
+              lammps_sim_name = "{}.{}"
+              lammps_sim_name = lammps_sim_name.format(structure,lammps_sim_template)
+              if lammps_sim_name not in self.lammps_sims.keys():
+                  self.lammps_sims[lammps_sim_name] = {}
+                  print("  ",lammps_sim_name, "created.")
+          else:
+              # qoi is not supported
+              msg_err = "qoi({}) does not support type({})..."
+              msg_err = msg_err.format(qoi,self.qoi[qoi]['variable'])
+              raise ValueError(msg_err)
+
+  def get_mass(self,element):
+      if element == 'Mg':
+          return 24.305
+      elif element == "O":
+          return 15.999
+      else:
+          raise ValueError("element {} not in database".format(element))
+          
+  def get_name(self,element):
+      if element == "Mg":
+          return 'magnesium'
+      elif element == "O":
+          return 'oxygen'
+      else:
+          raise ValueError('element {} not in database'.format(element))
+          
+  def write_lammps_buckingham_potential_file(self, potential_params, fname_out):
+      elements = self.potential_elements.keys()
+      charge = {'Mg':+2.00,'O':-2.00}
+      str_pot = ""
+      for i, element in enumerate(elements):
+          str_pot += "mass {} {}\n".format(i+1,self.get_mass(element))
+      str_pot += "\n"
+      for i, element in enumerate(elements):
+          str_pot += "group {} type {}\n".format(self.get_name(element),i+1)
+      str_pot += "\n"
+      for i, element in enumerate(elements):
+          str_pot += "set group {} charge {}\n".format(self.get_name(element),
+                                                       charge[element])
+      str_pot += "\n"
+      str_pot += "variable R_cut equal 10.0\n"
+      str_pot += "\n"
+      str_pot += "pair_style buck/coul/long ${R_cut}\n"
+      
+      for i, element_i in enumerate(elements):
+          for j, element_j in enumerate(elements):
+              if i <= j:
+                  try:
+                      p_rho = potential_params['p_{}{}_rho'.format(element_i,element_j)]
+                      p_a   = potential_params['p_{}{}_a'.format(element_i,element_j)]
+                      p_c   = potential_params['p_{}{}_c'.format(element_i,element_j)]
+                  except KeyError:
+                      
+                      p_rho = 0.0
+                      p_a = 0.5
+                      p_c = 0.0
+                  str_pot += "pair_coeff {} {} {} {} {} {}\n".format(i+1,j+1,p_rho,p_a,p_c,'${R_cut}')
+      str_pot += "\n"
+      str_pot += "kspace_style pppm 1.0e-5\n"
+      str_pot += "\n"
+      str_pot += "neighbor 1.0 bin\n"
+      str_pot += "neigh_modify every 1 delay 0 check yes\n"
+      f = open(fname_out,'w')
+      f.write(str_pot)
+      f.close()
+      return str_pot
+
+  def write_lammps_potential_file(self): 
+      self.write_lammps_buckingham_potential_file()      
+
+  def create_lammps_simulations(self):
+      for sim_name in self.lammps_sims:
+          print(sim_name)
+          
+  def create_lammps_simulation(self,
+                               sim_name,
+                               fname_structure,
+                               fname_sim_template,
+                               fname_potential = None,
+                               fname_eam = None):
+      potential_type = 'buckingham'
+      dir_name = sim_name
+      
+      # remove the directory if it exists
+      if os.path.exists(dir_name):
+          shutil.rmtree(dir_name)
+
+      # copy simulation template
+      src_dir = os.path.join(self.dir_lammps_sim_db, fname_sim_template)
+      dst_dir = os.path.join(os.path.curdir,dir_name)
+      shutil.copytree(src=src_dir,dst=dst_dir)
+      
+      # copy lammps structure file
+      src_fname = os.path.join(self.dir_structure_db, fname_structure)
+      dst_fname = os.path.join(os.path.curdir,dir_name,'lammps.structure')
+      shutil.copyfile(src= src_fname, dst=dst_fname)
+      
+      if not(fname_potential == None):
+        src_fname = os.path.join(fname_potential)
+        dst_fname = os.path.join(os.path.curdir,dir_name,'potential.mod')
+        shutil.copyfile(src_fname,dst_fname)
+      else:
+        print('not copying {}'.format(fname_potential))
+      
+      if not(fname_eam == None):
+          shutil.copyfile(fname_eam,"{}/eam.alloy".format(dir_name))
+
+      #modify input file
+      if potential_type == 'buckingham':
+        # get the name of the input file
+        path_sim = os.path.join(os.path.curdir,dir_name)
+        fname_list = [f for f in os.listdir(path_sim) if os.path.isfile(os.path.join(path_sim,f))]
+        fname_input_file = ""
+        for fname in fname_list:
+          if fname.startswith('in.'):
+            fname_input_file = fname
+        # replace atom type
+        # step 1: write new input file with modifications
+        # step 2: delete old input file
+        # step 3: move new input file into old input file location
+        old_fname = os.path.join(path_sim,fname_input_file)
+        new_fname = os.path.join(path_sim,"{}.tmp".format(fname_input_file))
+        with open(new_fname,'w') as new_file:
+          with open(old_fname,'r') as old_file:
+            for line in old_file:
+              new_file.write(line.replace('atom_style atomic', 'atom_style charge'))
+        os.remove(old_fname)             # remove old input file
+        shutil.move(new_fname,old_fname)  # copy new input file to old input file
 
   def check_potential_parameters(self):
-      
+
+      self.potential_elements = self.config_potential.elements      
       self.potential_parameter_list = self.config_potential.get_param_list()
+      self.potential_parameter_types = {}
+      for pair in self.config_potential.pair.keys():
+          self.potential_parameter_types[pair] = self.config_potential.pair[pair]['type']
       self.potential_parameters = {}
       for param in self.potential_parameter_list:
           self.potential_parameters[param] = self.config_potential.get_param_value(param)
+      self.potential_types = self.config_potential.pair
       
   def check_quantities_of_interest(self):
       print("\nchecking quantities of interest..")
@@ -55,7 +282,7 @@ class PyPosmatEngine:
               msg_out = msg_out.format(structure)
               print(msg_out)
           else:
-              err_out = "qoi_structure({}) not in in structe_db."
+              err_out = "qoi_structure({}) not in in structure_db."
               err_out = err_out.format(structure)
               raise ValueError(err_out)
               
@@ -64,7 +291,6 @@ class PyPosmatEngine:
           new_variable = self.config_qoi.qoi_info['qoi'][qoi_key]['variable']
           if new_variable not in variables: 
               variables.append(new_variable)
-              
               
       # confirm that the variables request in the quantities of interest
       # can be calculated with the known simulation templates
@@ -78,6 +304,23 @@ class PyPosmatEngine:
               err_out = err_out.format(variable)
               raise ValueError(err_out)
 
+      # build qoi lists      
+      self.qoi_list = self.config_qoi.qoi_info['qoi'].keys()
+      self.qoi = {}          
+      for qoi_key in self.qoi_list:
+          self.qoi[qoi_key] = {}
+          self.qoi[qoi_key]['structure']   = self.config_qoi.qoi_info['qoi'][qoi_key]['structure']
+          self.qoi[qoi_key]['weight']      = self.config_qoi.qoi_info['qoi'][qoi_key]['weight']
+          self.qoi[qoi_key]['target']      = self.config_qoi.qoi_info['qoi'][qoi_key]['target']
+          self.qoi[qoi_key]['norm']        = self.config_qoi.qoi_info['qoi'][qoi_key]['norm']
+          self.qoi[qoi_key]['variable']    = self.config_qoi.qoi_info['qoi'][qoi_key]['variable']
+          print(qoi_key)
+          print("\t",self.qoi[qoi_key]['structure'])
+          print("\t",self.qoi[qoi_key]['weight'])
+          print("\t",self.qoi[qoi_key]['target'])
+          print("\t",self.qoi[qoi_key]['norm'])
+          print("\t",self.qoi[qoi_key]['variable'])
+         
   def run(self):
       pass
   
@@ -165,28 +408,175 @@ class PyPosmatEngine:
               err_msg = err_msg.format(fname,name)
               raise IOError(err_msg)
 
+  def calculate_qoi(self):
+    self.get_properties_from_simulations()
+    self.get_qoi_estimates()
+
+    self.abs_error = {}
+    self.square_error = {}
+    self.square_error_normalized = {}
+
+    for key in self.qoi_list:
+      self.abs_error[key] = abs(self.qoi[key]['est'] - self.qoi[key]['target'])
+      self.square_error[key] = self.abs_error[key]**2
+      self.square_error_normalized[key] = self.square_error[key]/self.qoi[key]['norm']
+
+  def get_properties_from_simulations(self):
+    # get properties from simulation
+    self.properties = {}
+    for qoi_key in self.qoi_list:
+      variable_name = self.qoi[qoi_key]['variable']
+      structures    = self.qoi[qoi_key]['structure']
+
+      if variable_name == 'latt_a':
+        simulation      = "{}.{}".format(structures[0],'E_coh')
+        property_name   = "{}.{}".format(structures[0],'a_lat')
+        if not(property_name in self.properties.keys()):
+          self.properties[property_name] = pyflamestk.lammps.getLatticeParameter(os.path.join(simulation,'out.dat'))
+      elif variable_name == 'E_coh':
+        simulation      = "{}.{}".format(structures[0],'E_coh')
+        property_name   = "{}.{}".format(structures[0],'E_coh')
+        if not(property_name in self.properties.keys()):
+          self.properties[property_name] = pyflamestk.lammps.getCohesiveEnergy(os.path.join(simulation,'out.dat'))
+      elif variable_name == 'phase_difference':
+        for structure in structures:
+          simulation    = "{}.{}".format(structure,'E_coh')
+          property_name = "{}.{}".format(structure,'E_coh')
+          self.properties[property_name] = pyflamestk.lammps.getCohesiveEnergy(os.path.join(simulation,'out.dat'))
+      elif variable_name in ['c11', 'c12', 'c44', 'B_modulus', 'G_modulus']:
+        simulation      = "{}.{}".format(structures[0],'elastic')
+        for var in ['c11','c12','c44']:
+          property_name   = "{}.{}".format(structures[0],var)
+          self.properties[property_name]   = pyflamestk.lammps.getElasticComponent(os.path.join(simulation,'out.dat'),var)
+      elif variable_name == "E_f_defect":
+        for structure in structures:
+          simulation    = "{}.{}".format(structure,'E_coh')
+          property_name = "{}.{}".format(structure,'E_coh')
+          self.properties[property_name] = pyflamestk.lammps.getCohesiveEnergy(os.path.join(simulation,'out.dat'))
+      elif variable_name == "sp_pressure":
+        simulation      = "{}.{}".format(structures[0],"sp")
+        property_name   = "{}.{}".format(structures[0],'pressure_total')
+        self.properties[property_name]   = pyflamestk.lammps.getPressure(os.path.join(simulation,'out.dat'),type='total')
+      elif variable_name == "sp_ecoh":
+        simulation      = "{}.{}".format(structures[0],"sp")
+        property_name   = "{}.{}".format(structures[0],'E_coh_press')
+        self.properties[property_name]   = pyflamestk.lammps.getCohesiveEnergy(os.path.join(simulation,'out.dat'))
+      else:
+        print("pyposmat qoi not supported: {}".format(variable_name))
+
+  def get_qoi_estimates(self):
+    for qoi_key in self.qoi_list:
+      variable_name = self.qoi[qoi_key]['variable']
+      structures    = self.qoi[qoi_key]['structure']
+
+      if variable_name == 'latt_a':
+        self.qoi[qoi_key]['est'] =  self.properties["{}.{}".format(structures[0],'a_lat')]
+      elif variable_name == 'E_coh':
+        self.qoi[qoi_key]['est'] =  self.properties["{}.{}".format(structures[0],'E_coh')]
+      elif variable_name == 'phase_difference':
+        property_names   = ["{}.{}".format(structure, 'E_coh') for structure in structures]
+        e_coh_0 = self.properties[property_names[0]] # hcp
+        e_coh_1 = self.properties[property_names[1]] # fcc
+        print(property_names[0],e_coh_0)
+        print(property_names[1],e_coh_1)
+        self.qoi[qoi_key]['est'] = e_coh_0 - e_coh_1
+      elif variable_name in ['c11', 'c12', 'c44']:
+        self.qoi[qoi_key]['est'] = self.properties["{}.{}".format(structures[0],variable_name)]
+      elif variable_name in ['B_modulus']:
+        c11 = self.properties["{}.c11".format(structures[0])]
+        c12 = self.properties["{}.c12".format(structures[0])]
+        self.qoi[qoi_key]['est'] = calculate_bulk_modulus(c11,c12)
+      elif variable_name in ['G_modulus']:
+        c11 = self.properties["{}.c11".format(structures[0])]
+        c12 = self.properties["{}.c12".format(structures[0])]
+        self.qoi[qoi_key]['est'] = calculate_shear_modulus(c11,c12)
+      elif variable_name == "E_f_defect":
+        n_atoms_ideal  = 1 
+        n_atoms_defect = 2
+        E_coh_ideal  = self.properties["{}.{}".format(structures[0],'E_coh')]
+        E_coh_defect = self.properties["{}.{}".format(structures[1],'E_coh')]
+        self.qoi[qoi_key]['est'] = n_atoms_defect * E_coh_defect - n_atoms_defect * E_coh_ideal 
+      elif variable_name == "sp_pressure":
+        property_name   = "{}.{}".format(structures[0],'pressure_total')
+        self.qoi[qoi_key]['est'] = self.properties[property_name]
+      elif variable_name == "sp_ecoh":
+        property_name   = "{}.{}".format(structures[0],'E_coh_press')
+        self.qoi[qoi_key]['est'] = self.properties[property_name]
+      else:
+        print("pyposmat qoi not supported: {}".format(variable_name))
+
 class MonteCarloParameterSampler(PyPosmatEngine):
     
+  def run(self,n_simulations = 10, fname_results = 'results.out'):
+
+    #check to see if file exists and delete
+    if os.path.exists(fname_results):
+      if os.path.isfile(fname_results):
+        os.remove(fname_results)
     
-  def run(self,n_simulations = 10):
+    f = open(fname_results,'w')
+    
+    # print header line
+    str_out = ""
+    str_out += "sim_id "
+    for param in self.potential_parameter_list:
+      str_out += "{} ".format(param)
+    str_out += "| "
+    for qoi_key in self.qoi_list:
+      str_out += "{}_abserr ".format(qoi_key)
+      str_out += "{}_sqerr ".format(qoi_key)
+      str_out += "{}_nsqerr ".format(qoi_key)
+    str_out += "\n"
+    f.write(str_out)
+
     param_set = []  # initialize
-    n_parameters = len(self.potential_parameter_list)
+    qoi_set   = []  # initialize
     for i_simulation in range(n_simulations):
 
-        new_param_set = np.zeros(shape=[1,n_parameters])
-        
+        new_param_set = {}
         i = 0
         for param in self.potential_parameter_list:
             a = self.potential_parameters[param][1]
             b = self.potential_parameters[param][2]
-            new_param_set[0,i] = np.random.uniform(low = a, high = b)
+            new_param_set[param] = np.random.uniform(low = a, high = b)
             i += 1
-        self.evaluate_parameter_set(new_param_set[0,:].tolist())
-        param_set.append(new_param_set[0,:].tolist())
-    np_param_set = np.array(param_set)
 
-  def evaluate_parameter_set(self, parameter_set):
-      print(parameter_set)
+        # TODO: generalize this code
+        new_param_set['chrg_O'] = - new_param_set['chrg_Mg']
+
+        print('evaluating param_set_id:{}'.format(i_simulation))
+        self.evaluate_parameter_set(new_param_set)
+        self.run_all_lammps_simulations()
+        self.calculate_qoi()
+
+        new_qoi_set = []
+        i = 0
+        for qoi_key in self.qoi_list:
+          new_qoi_set.append(self.abs_error[qoi_key])
+          new_qoi_set.append(self.square_error[qoi_key])
+          new_qoi_set.append(self.square_error_normalized[qoi_key])
+
+        str_out = ""
+        str_out = "{} ".format(i_simulation)
+        for param in self.potential_parameter_list:
+          str_out += "{} ".format(new_param_set[param])
+        str_out += "| "
+        for qoi_result in new_qoi_set:
+          str_out += "{} ".format(qoi_result)
+        str_out += "\n"
+        f.write(str_out)
+        param_set.append(new_param_set)
+        qoi_set.append(new_qoi_set)
+
+    f.close()
+    str_out = ""
+    for i_set, set in enumerate(param_set):
+      str_out += "{} ".format(i_set)
+      for param in self.potential_parameter_list:
+        str_out += "{} ".format(set[param])
+      str_out += "\n"
+
+    #np_param_set = np.array(param_set)
 
 class ConfigFile:
   def __init__(self, fname_config = "pyposmat.config",is_read = True):
@@ -295,8 +685,14 @@ def read_pyposmat_config_file(fname_config):
 
 class PotentialConfigFile:
   def __init__(self, fname_config = "pyposmat.potential",is_read = True):
+
+    # class member variables
     self.fname_config = fname_config
     self.config_dict  = {}
+    self.elements = {}
+    self.pair = {}
+    
+    
     if is_read == True:
       self.read()
       
@@ -403,7 +799,6 @@ class QoiConfigFile:
                 self.qoi_info['qoi'][qoi_name]['weight'] = qoi_weight
                 self.qoi_info['qoi'][qoi_name]['norm']   = qoi_norm
                 
-                print(self.qoi_info['qoi'][qoi_name])
             else:
                 msg_err = "unknown qoi_keyword({})"
                 msg_err = msg_err.format(keyword)
