@@ -6,6 +6,9 @@ import subprocess
 import numpy as np
 
 import pyflamestk.lammps
+
+
+
 class PyPosmatError(Exception):
   def __init__(self, value):
     self.value = value

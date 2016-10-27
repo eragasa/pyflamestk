@@ -1,4 +1,4 @@
-import pyflamestk.eam
+import pyflamestk.eam_tools
 import numpy as np
 import scipy.optimize
 import matplotlib.pyplot as plt
@@ -61,7 +61,7 @@ opt_param_pair,  opt_cov_pair  = scipy.optimize.curve_fit(func_pair_effective_ch
                                                           p0 = p0,
                                                           maxfev=200000)
 fembed_rho = eam_file1.fembed['Ni'][:,0]
-:wfembed     = eam_file1.fembed['Ni'][:,1]
+fembed     = eam_file1.fembed['Ni'][:,1]
 p0         = [1,2,1,1]
 opt_param_fembed,  opt_cov_fembed  = scipy.optimize.curve_fit(func_embedding_universal,
                                                           fembed_rho.tolist(), 
