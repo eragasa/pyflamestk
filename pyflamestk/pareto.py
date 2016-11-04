@@ -155,6 +155,7 @@ class SimulationResults:
     self.np_all_sims = []     # numpy array of all simulation data
     self.n_resamples = 0
 
+    self.performance_requirements = {}
     
     self.pareto_dataset = []
     self.pareto_set = []
@@ -308,10 +309,33 @@ class SimulationResults:
           
   def cull_by_percentile(self,pct_kept=10.):
         """
-        pct_kept        number between 1 and 100 indicating the pct of simulations
-                        within the Pareto set which should be kept
+        
+        Arguments:
+        pct_kept (float, 10.0) - number between 1 and 100 indicating the pct of simulations
+            within the Pareto set which should be kept
+                        
+        Returns:
+        
+        a numpy array with observations indexed in rows, and parameters
+        and quantities of interst indexed in columns.  The column index is the
+        same as the array in "self.all_names".
+        
+        Note:
+        
+        TODO:
+        
+        1)   A Newton-Ralphson method to get more accurate performance requirements
+        to prevent over culling of the Pareto set.
         """
-        self.pct_kept = pct_kept
+        
+        if 0 <= pct_kept <= 100.:
+            errmsg = "pct_kept must be between 1 and 100, the value {} was passed."
+            errmsg = errmsg.format(pct_kept)
+            raise ValueError(errmsg)
+        else:
+            self.pct_kept = pct_kept
+            
+            
         qoi_keys = self.qoi_keys
         self.performance_requirements = {}
         for qoi_key in qoi_keys:
@@ -319,59 +343,63 @@ class SimulationResults:
         n_sims, n_qoi = self.np_pareto_set.shape        
     
         # intialize variables
-        msg_out = ""
-        rows_to_delete = []
         pctl_threshold = 100        # searching for 100% within the Pareto set
                                     # to 0% in the pareto set
+        is_culled = False           # intialize
         
-    
-        is_culled = False
         while not is_culled:
             rows_to_delete = []
             pctl_threshold -= 1
             # calculate percentile cutoffs
             for qoi_key in self.performance_requirements.keys():
                 if pctl_threshold < 0:
-                    # TODO: throw an exception here
-                    print(msg_out)
-                    print("percentile must be greater than 0")
-                    is_culled = True
+                    errmsg = "While searching for the pctl_threshold, the percentile error dropped below zero resulting in an error."
+                    raise ValueError(errmsg)
+                    # TODO: remove
+                    # print(msg_out)
+                    # print("percentile must be greater than 0")
+                    # is_culled = True
                 else:
-                    qoi_id = self.all_names.index(qoi_key)
-                    qoi_data = self.np_pareto_set[:,qoi_id]
+                    qoi_data = self.get_data_by_name(qoi_key, 'pareto')
+                    #TODO: remove
+                    #qoi_id = self.all_names.index(qoi_key)
+                    # qoi_data = self.np_pareto_set[:,qoi_id]
                     self.performance_requirements[qoi_key] = np.percentile(qoi_data, pctl_threshold)
-        
-            #cull the pareto set by the performance requirements
-            for qoi_key in self.performance_requirements.keys():
-        
+
+            # cull the pareto set by the performance requirements
+            for qoi_key in self.performance_requirements.keys():        
                 np_pareto_set_cull = np.copy(self.np_pareto_set)
                 for idx in range(n_sims):
-                  ps = np_pareto_set_cull[idx,:]
-                  is_delete_row = False
-                  for qoi_name in self.performance_requirements.keys():
-                    qoi_idx = self.all_names.index(qoi_name)
-                    if ps[qoi_idx] > self.performance_requirements[qoi_name]:
-                      is_delete_row = True 
-                  if is_delete_row:
-                    rows_to_delete.append(idx)
-                    
+                    ps = np_pareto_set_cull[idx,:]
+                    is_delete_row = False
+                    for qoi_name in self.performance_requirements.keys():
+                        qoi_idx = self.all_names.index(qoi_name)
+                        if ps[qoi_idx] > self.performance_requirements[qoi_name]:
+                            is_delete_row = True 
+                    if is_delete_row:
+                        rows_to_delete.append(idx)
+            
+            # check to see if the pareto set has been sufficiently culled
             n_culled = len(rows_to_delete)
             pct_culled = float(n_culled/n_sims)
             if pct_kept/100. > 1 - pct_culled:
-                msg_out += "n_pareto_set        = {}\n".format(n_sims)
-                msg_out += "n_rows_culled       = {}\n".format(n_culled)
-                msg_out += "n_culled_pareto_set = {}\n".format(n_sims - n_culled)
-                msg_out += "performance constraints:\n"
-                for qoi_key in self.performance_requirements.keys():
-                    msg_out += "\t {} < {:0.4f}\n".format(qoi_key,self.performance_requirements[qoi_key])
-
                 is_culled = True
         
         # delete rows not in the pareto set
         self.np_pareto_set_cull = np.copy(self.np_pareto_set)
         self.np_pareto_set_cull = np.delete(np_pareto_set_cull,rows_to_delete,axis=0)
-    
-        print(msg_out)          
+
+        # TODO: this should be moved to a reporting section
+        msg_out = ""                # intialize output string
+        msg_out += "n_pareto_set        = {}\n".format(n_sims)
+        msg_out += "n_rows_culled       = {}\n".format(n_culled)
+        msg_out += "n_culled_pareto_set = {}\n".format(n_sims - n_culled)
+        msg_out += "performance constraints:\n"
+        for qoi_key in self.performance_requirements.keys():
+            msg_out += "\t {} < {:0.4f}\n".format(qoi_key,self.performance_requirements[qoi_key])    
+        print(msg_out)
+        
+        return self.np_pareto_set_cull.copy()
 
   def add_performance_constraint(self,metric_name,metric_value):
     self.performance_requirements[metric_name] = metric_value
@@ -410,40 +438,125 @@ class SimulationResults:
     x_idx = self.all_names.index(name)
     plt.hist(self.np_all_sims[:,x_idx])
     plt.show()
-
-  def create_2d_pareto_plot(self,qoi_name_1,qoi_name_2,error_type):
-        # calculate the pareto front
+    
+  def get_data_by_name(self,name,ds_type):
+      """
+      Arguments:
+      
+      name (str) - string of parameter or quantity of interest
+      ds_type (str) - string of which dataset we are taking the data from.
+          The ds_types which are supported are: all, pareto, pareto_culled
+          
+      Returns:
+      
+      a numpy array of the data asked for
+          
+      """
+      
+      idx = self.all_names.index(name)
+      
+      if ds_type == 'all':
+          return self.np_all_sims[:,idx]
+      elif ds_type == 'pareto':
+          return self.np_pareto_set[:,idx]
+      elif ds_type == 'pareto_cull':
+          return self.np_pareto_set_cull[:,idx]
+      else:
+          errmsg = "ds_type must be either all, pareto, or pareto_cull"
+          raise ValueError(errmsg)
+ 
+  def create_2d_pareto_plot(self,
+                            qoi_name_1,
+                            qoi_name_2,
+                            error_type = "",
+                            show_dominated = True,
+                            show_pareto = True, 
+                            show_culled = True,
+                            show_2d_pareto_curve = True,
+                            show_2d_culled_curve = True):   
+        """
+        Arguments:
+        
+        qoi_name_1 (string) - the name of the first quantity of interest to be
+            plotted on the x-axis
+        qoi_name_2 (string) - the name of the second quantity of interest to be
+            plotted on the y-axis
+        error_type (string: "" ) - not implemented yet
+        show_dominated (bool, True) - shows dominated points when set to true
+        show_pareto (bool,True) - shows Pareto points when set to true.
+        show_culled (bool,True) - shows the remaining Pareto points when the 
+            Pareto set is culled by by performance requirements.
+        show_2d_pareto_curve (bool,True) - shows a 2d slice of the Pareto curve
+            when set to True.
+        show_2d_pareto_cuve (bool,True) - shows a 2d slice of the culled Pareto
+            curve when set to false.
+            
+        Returns:
+        
+        Nothing
+            
+        Notes:
+        
+        When the dominated points are plotted, it actually plots all the points
+        in the dataset.  However, these points are then plotted over by the
+        Pareto points.
+        """
+        
+        
         x_label = qoi_name_1
         y_label = qoi_name_2
                                    
-        x_idx = self.all_names.index(qoi_name_1)
-        y_idx = self.all_names.index(qoi_name_2)
-        pareto_front = pyflamestk.pareto.pareto_frontier_2d(self.np_all_sims[:,x_idx],
-                                                            self.np_all_sims[:,y_idx],
-                                                            maxX = False, maxY= False)
+        x_data_all = self.get_data_by_name(x_label, 'all')
+        y_data_all = self.get_data_by_name(y_label, 'all')
+        
+        if show_pareto == True:
+            x_data_pareto = self.get_data_by_name(x_label, 'pareto')
+            y_data_pareto = self.get_data_by_name(y_label, 'pareto')
 
+            if show_2d_pareto_curve == True:
+                pareto_2d = pyflamestk.pareto.pareto_frontier_2d(x_data_all,
+                                                                 y_data_all,
+                                                                 maxX = False, maxY= False) 
+            
+        if show_culled == True:
+            x_data_cull = self.get_data_by_name(x_label, 'pareto_cull')
+            y_data_cull = self.get_data_by_name(y_label, 'pareto_cull')
+
+            if show_2d_pareto_curve == True:
+                cull_2d = pyflamestk.pareto.pareto_frontier_2d(x_data_cull,
+                                                               y_data_cull,
+                                                               maxX = False, maxY= False)         
         # plot results
         plt.figure()
+    
+        if show_dominated == True:
+            c = 'b'
+            plt.scatter(x_data_all, y_data_all, color = c)
+            
+        if show_pareto == True:
+            c = 'y'
+            plt.scatter(x_data_pareto,y_data_pareto, color=c)
+            if show_2d_pareto_curve == True:
+                plt.plot(pareto_2d[0],pareto_2d[1],color=c)
+
+        if show_culled == True:
+            c = 'g'
+            plt.scatter(x_data_cull,  y_data_cull, color = c)
+            if show_2d_pareto_curve == True:
+                plt.plot(cull_2d[0],cull_2d[1],color=c)
+
+        # determine axis
+        xmin = min(pareto_2d[0])
+        xmax = max(pareto_2d[0])
+        ymin = min(pareto_2d[1])
+        ymax = max(pareto_2d[1])
+        plt.axis([xmin,xmax,ymin,ymax])
         
-        # dominated points
-        x_idx = self.all_names.index(qoi_name_1)
-        y_idx = self.all_names.index(qoi_name_2)
-        plt.scatter(self.np_all_sims[:,x_idx],
-                    self.np_all_sims[:,y_idx])
-                                                            
-        x_idx = self.qoi_keys.index(qoi_name_1)
-        y_idx = self.qoi_keys.index(qoi_name_2)
-        plt.scatter(self.pareto_set[:,x_idx],
-                    self.pareto_set[:,y_idx],
-                    color='y')
-                    
-        plt.plot(pareto_front[0],pareto_front[1])
-        plt.axis([min(pareto_front[0]),
-                  max(pareto_front[0]),
-                  min(pareto_front[1]),
-                  max(pareto_front[1])])
+        # add labels
         plt.xlabel(x_label)
         plt.ylabel(y_label)
+        
+        # display graph
         plt.show()
   
   def create_all_pareto_plots(self,qoi_list):
