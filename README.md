@@ -11,3 +11,6 @@ Interfaces to Major Packages:
 - VASP (calculator for DFT simulations)
 - LAMMPS (calculator for Molecular Dynamics Simulations)
 - DAKOTA (calculator for VVUQ Simulations)
+
+Primary Functionality:
+- Fitting of empirical interatomic potentials via pareto surface
