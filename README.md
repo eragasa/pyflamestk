@@ -14,3 +14,5 @@ Interfaces to Major Packages:
 
 Primary Functionality:
 - Fitting of empirical interatomic potentials via pareto surface
+- Simulation of Infrared Spectra, via VASP
+- Simulation of Raman Spectra, via VASP
