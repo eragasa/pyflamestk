@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import scipy.optimize
 import copy
 
@@ -27,9 +28,11 @@ class Potential:
 
         self._name = None
         self._type = None
-        self._atoms = []
-        self._parameters = []
-
+        self._atoms = None
+        self._params = None
+        self._parameter_names = None
+        self._param_constraints = None
+        
         if potential is not None:
             # use copy constructor
             self._copy_init(potential)
@@ -53,12 +56,11 @@ class Potential:
     def _copy_init(self,obj):
         self._name = obj._name
         self._type = obj._type
-        self._atoms = list(atoms)
-
+        self._atoms = list(obj._atoms)
         self._parameter_names = list(obj._parameter_names)
-        
+
     def _make_parameter_dictionary(self):
-        raise NotImplementedError    
+        self._params = {name:None for name in self._parameter_names}
 
     @property
     def name(self):
@@ -70,29 +72,57 @@ class Potential:
 
     @property
     def parameter_names(self):
-        raise NotImplementedError
+        if self._parameter_names is None:
+            self._set_parameter_list()
+        return copy.copy(self._parameter_names)
         
     @parameter_names.setter
     def parameter_names(self, p_list):
         raise NotImplementedError
+
+    @property
+    def parameter_constraints(self):
+        return copy.deepcopy(self._param_constraints)
         
-    def evaluate(self):
-        pass
+    def add_parameter_constraint(self, param, operator, param_value):
+        if self._param_constraints is None:
+            self._param_constraints = []
+        if [param, operator, param_value] not in self._param_constraints:
+            self._param_constraints.append([param,operator, param_value])
     
-    def set_parameter_list(self):
-        pass
-    
-    def get_parameter_list(self):
-        pass
 
 class Buckingham(Potential):
     def __init__(self,name,atoms):
         Potential.__init__(self, name, 'buckingham', atoms)
-        for atom in self.atoms:
-            print('atom',atom)
-            
+        self._set_parameter_names()
+        self._make_parameter_dictionary()
+        self._add_model_parameter_constraints()
+        
+    def _set_parameter_names(self):
+        self._parameter_names = []
+        
+        # ionic charge
+        for a in self._atoms:
+            self._parameter_names.append("chrg_{}".format(a))
+
+        # buckingham, pair_terms
+        pairs = []
+        for a_i in self._atoms:
+            for a_j in self._atoms:
+                if ([a_i,a_j] not in pairs) and ([a_j,a_i] not in pairs):
+                    pairs.append([a_i,a_j])
+                    self._parameter_names.append("{}{}_A".format(a_i,a_j))
+                    self._parameter_names.append("{}{}_rho".format(a_i,a_j))
+                    self._parameter_names.append("{}{}_C".format(a_i,a_j))
+    
+    def _add_model_parameter_constraints(self):
+        for p in self._parameter_names:
+            if p.endswith("_rho"):
+                self.add_parameter_constraint(p, '>=', 0.)
+
         
 class EamPotential(Potential):
+    
     def __init__(self, name,cutoff, embed_type, dens_type, pair_type, atoms):
         Potential.__init__(name, 'eam/analytical',atoms)
         self.cutoff = 0
@@ -101,7 +131,7 @@ class EamPotential(Potential):
         self.pair_type  = pair_type
         self._initialize_potentials()
         
-    def _initialize_potentials():
+    def _initialize_potentials(self):
         self.embedding = {}
         self.density   = {}
         self.pair      = {}
@@ -171,18 +201,18 @@ def electrondensity_voterchen(r,c1,c2,rcut):
     return rho
 
 def cuttoff_exponential(r,r_cut):
-    fcut = np.exp(1/(r-rcut))
+    fcut = np.exp(1/(r-r_cut))
     return fcut
 
 def rhofxn(a,rho0,r0,lambda0,rd,rhostar):
     ''' calculates ideal e- density based on exponential functional form 
         data input format:  rho0  r0    lambda0  rd   rhostar ''' 
-    return rho0*(12.*exp(-(a/sqrt(2.)-r0)/lambda0)  * psi( (a/sqrt(2.)-rd) / (globalcutoff-rd) )
-               +  6.*exp(-(a-r0)/lambda0)           * psi( (a-rd)          / (globalcutoff-rd) )
-               + 24.*exp(-(a*sqrt(1.5)-r0)/lambda0) * psi( (a*sqrt(1.5)-rd) / (globalcutoff-rd) )
-               + 12.*exp(-(a*sqrt(2.)-r0)/lambda0)  * psi( (a*sqrt(2.)-rd) / (globalcutoff-rd) )
-               + 24.*exp(-(a*sqrt(2.5)-r0)/lambda0) * psi( (a*sqrt(2.5)-rd) / (globalcutoff-rd) )
-               +  8.*exp(-(a*sqrt(3.)-r0)/lambda0)  * psi( (a*sqrt(3.)-rd) / (globalcutoff-rd) )
+    return rho0*(12.*math.exp(-(a/sqrt(2.)-r0)/lambda0)  * psi( (a/math.sqrt(2.)-rd) / (globalcutoff-rd) )
+               +  6.*math.exp(-(a-r0)/lambda0)           * psi( (a-rd)          / (globalcutoff-rd) )
+               + 24.*math.exp(-(a*sqrt(1.5)-r0)/lambda0) * psi( (a*math.sqrt(1.5)-rd) / (globalcutoff-rd) )
+               + 12.*math.exp(-(a*sqrt(2.)-r0)/lambda0)  * psi( (a*math.sqrt(2.)-rd) / (globalcutoff-rd) )
+               + 24.*math.exp(-(a*sqrt(2.5)-r0)/lambda0) * psi( (a*math.sqrt(2.5)-rd) / (globalcutoff-rd) )
+               +  8.*math.exp(-(a*sqrt(3.)-r0)/lambda0)  * psi( (a*math.sqrt(3.)-rd) / (globalcutoff-rd) )
             ) - rhostar
 
 def embedding_eos_voterchen(rho,ecoh,am,r0,rho0,lambda0,lambdarose,de,rp,rd):
@@ -208,7 +238,7 @@ def embedding_eos_voterchen(rho,ecoh,am,r0,rho0,lambda0,lambdarose,de,rp,rd):
         #solve density for lattice constant (a) where density (rhostar) is found
         
         # Uses Brent(1973) method for finding the zero of a function
-        rho_p = (rho0,r0,lambda0,rd,rhp_i)        
+        rho_p = (rho0,r0,lambda0,rd,rho_i)        
         a = scipy.optimize.brentq(electrondensity_voterchen,
                                   0.,
                                   10000.,
