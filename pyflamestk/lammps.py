@@ -6,22 +6,57 @@ import pyflamestk.base as base
 
 class Simulation:
 
-  def __init__(self, sim_name, directory, structure):
-    self.name = sim_name
-    self.fname_dir  = directory
-    self.fname_structure = structure
-    self.script = None
-    self.potential = None
+    def __init__(self, sim_name, directory, structure):
+        self.supported_sim_types = []
+        self.name = sim_name
+        self.fname_dir  = directory
+        self.fname_structure = structure
+        self.script = None
+        self.potential = None
 
-  def create(self):
-    # make directory
-    if os.path.exists(self.dir):
-      pass
-    else:
-      os.path.makedirs(self.dir)
+        self._type = None        
+        self._has_error = None
+        self._is_done = None
 
-  def run(self):
-    pass
+    @property
+    def type(self):
+        return self._type
+        
+    @type.setter
+    def type(self):
+        self._type
+         
+    @property
+    def has_error(self):
+        self.check_for_errors()
+        return
+
+    @property
+    def is_done(self):
+        if (self._is_done is None) or (self._is_done == False):
+            self.check_is_done()
+            
+        return self._is_done
+
+    def create(self):
+        # make directory
+        if os.path.exists(self.dir):
+            pass
+        else:
+            os.path.makedirs(self.dir)
+
+    def check_for_errors(self, fname_lmps_log):
+        lines = base.tail(fname = fname_lmps_log, n_lines = 1)
+        for line in lines:
+            if 'Neighbor list overflow, boost neigh_modify one' in line:
+                self._has_error = True
+                return True
+
+    def check_is_done(self):
+        raise NotImplementedError
+
+    def run(self):
+        pass
 
 class InputFile:
   def __init__(self):
@@ -34,6 +69,7 @@ class InputFile:
 
       self.potential_type = "eam/alloy"
       self.eam_alloy_file = "eam.alloy"
+      
   def initializeSimulations(self):
     str_out  = "# written by pyPosMat\n"
     str_out += "# ---- intialize simulation\n"
