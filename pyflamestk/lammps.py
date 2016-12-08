@@ -25,15 +25,15 @@ class Simulation:
 
 class InputFile:
   def __init__(self):
-    self.units = "metal"
-    self.dimension = 3
-    self.boundary = "p p p"
-    self.atom_style = "atomic"
-    self.atom_modify = "map array"
-    self.structure_fname = ""
+      self.units = "metal"
+      self.dimension = 3
+      self.boundary = "p p p"
+      self.atom_style = "atomic"
+      self.atom_modify = "map array"
+      self.structure_fname = ""
 
-    self.potential_type = "eam/alloy"
-    self.eam_alloy_file = "eam.alloy"
+      self.potential_type = "eam/alloy"
+      self.eam_alloy_file = "eam.alloy"
   def initializeSimulations(self):
     str_out  = "# written by pyPosMat\n"
     str_out += "# ---- intialize simulation\n"
@@ -179,7 +179,7 @@ def checkAllLammpsSimulationsDone(sim_directories):
     return True
 
 def checkLammpsSimulationForError(fname_lmps_log):
-  lines = pyflamestk.base.tail(fname = fname_lmps_log, n_lines = 1)
+  lines = base.tail(fname = fname_lmps_log, n_lines = 1)
   for line in lines:
     if 'Neighbor list overflow, boost neigh_modify one' in line:
       return True

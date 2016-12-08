@@ -149,6 +149,7 @@ class SimulationResults:
     self.qoi_keys = []        # TODO: horrible name fix
     self.qoi_err_keys = []
     self.qoi_err_type = 'abserr'    
+
     # numpy array initialization, 
     # set to None also indicates that calculations have not been done
     self.np_all_sims = None              # numpy array of all simulation data
@@ -163,10 +164,13 @@ class SimulationResults:
     self.pareto_set_id = []
 
     # filenames    
-    self.fname_log_file = None
+    self.fname_log_file = "log.pyposmat"
     self.fname_sim_results = None
     self.fname_pareto = None
     self.fname_cull= None
+
+    # filename handles
+    self.file_log = None
      
     self.__open_log_file()
 
@@ -175,15 +179,17 @@ class SimulationResults:
 
   # SOME FUNCTIONS HERE TO DEAL WITH APPLICATION LOGGING.          
   def __open_log_file(self):
-      self.log_file = open(self.fname_log_file)
+      if self.file_log is None:
+          self.file_log = open(self.fname_log_file,'w')
   
   def __close_log_file(self):
-      self.log_file.close()
+      self.file_log.close()
   
   def __log(self,msg):
-      self.log_file.write(msg + "\n")
+      self.file_log.write(msg + "\n")
       print(msg)
     
+
   def __write_pareto_set(self,
                          fname_out='pareto.out',
                          param_names=None,
@@ -264,9 +270,10 @@ class SimulationResults:
   def __read_file(self, fname, file_type):
  
       # read file into memory     
-      f = open(self.fname)          
+      f = open(fname)          
       lines = f.readlines()
       f.close()
+
       n_lines = len(lines)               # number of lines in a file
           
       # read header line
@@ -281,25 +288,21 @@ class SimulationResults:
         
           # the '|' separates the parameter values from the qois
           params = lines[i_line].strip().split('|')[0].split()
-          qois = lines[i_line].strip().split('|')[1].split()
+          qois   = lines[i_line].strip().split('|')[1].split()
           
           # parse parameters
-          for i, param in enumerate(params):
-              if i == 0:
-                  params[i] = int(param)
-              else:
-                  params[i] = float(param)
+          params = [float(p) for p in params]
+          params[0] = int(params[0])
             
           # parse qoi values
-          for i, qoi in enumerate(qois):
-              qois[i] = float(qoi)
+          qois = [float(q) for q in qois]
         
           all_sims.append(params+qois)
         
       if file_type == 'sim_results':
-          self.param_names = param_names
-          self.qoi_names   = qoi_names
-          self.all_names   = all_names
+          self.param_names = list(param_names)
+          self.qoi_names   = list(qoi_names)
+          self.all_names   = list(all_names)
           self.np_all_sims = np.array(all_sims)
           self.__get_names_for_error_types()
       
@@ -319,74 +322,30 @@ class SimulationResults:
       """
 
       
-      self.filename_in = fname_in
-      
+      self.fname_sims = fname_sims
       self.__read_file(fname_sims, 'sim_results')
       
-      if not fname_pareto == None:
+      if fname_pareto is not None:
           self.fname_pareto = fname_pareto
-          self.__read_file(fname_sims, 'pareto')
+          self.__read_file(fname_in, 'pareto')
           
-      if not fname_cull == None:
+      if fname_cull is not None:
           self.fname_cull = fname_cull
-          self.__read_file(fname_sims, 'cull')
+          self.__read_file(fname_in, 'cull')
           
-#      # read file
-#      f = open(self.filename_in)
-#      lines = f.readlines()
-#      f.close()
-#      n_lines = len(lines)               # number of lines in a file
-#      self.n_lines = len(lines)
-#      self.n_simulations = n_lines - 1
-#      self.n_resamples = n_lines - 1
-#    
-#      # read header line
-#      line = lines[0]
-#      param_names = line.strip().split('|')[0].split()
-#      qoi_names   = line.strip().split('|')[1].split()
-#      all_names   = param_names + qoi_names
-#    
-#      # read simulations
-#      self.all_sims = [] # initialization                     
-#      for i_line in range(1,n_lines):
-#        
-#          # the '|' separates the parameter values from the qois
-#          params = lines[i_line].strip().split('|')[0].split()
-#          qois = lines[i_line].strip().split('|')[1].split()
-#          
-#          # parse parameters
-#          for i, param in enumerate(params):
-#              if i == 0:
-#                  params[i] = int(param)
-#              else:
-#                  params[i] = float(param)
-#            
-#          # parse qoi values
-#          for i, qoi in enumerate(qois):
-#              qois[i] = float(qoi)
-#        
-#          self.all_sims.append(params+qois)
-#        
-#      self.param_names = param_names
-#      self.qoi_names   = qoi_names
-#      self.all_names   = all_names
-#      self.np_all_sims = np.array(self.all_sims)
-#    
-#      self.__get_names_for_error_types()
-
   def set_qoi_type(self,qoi_type):
-    self.qoi_type = qoi_type
-    self.qois = []
-    if qoi_type == 'abserr':
-        self.qois = self.names_abserr
-    elif qoi_type == "nabserr":
-        self.qois = self.names_nabserr
-    elif qoi_type == "sqerr":
-        self.qois = self.names_sqerr
-    elif qoi_type == "nsqerr":
-        self.qois = self.names_nsqerr
-    else:
-        raise ValueError("unknown_qoi_type")
+      self.qoi_type = qoi_type
+      self.qois = []
+      if qoi_type == 'abserr':
+          self.qois = self.names_abserr
+      elif qoi_type == "nabserr":
+          self.qois = self.names_nabserr
+      elif qoi_type == "sqerr":
+          self.qois = self.names_sqerr
+      elif qoi_type == "nsqerr":
+          self.qois = self.names_nsqerr
+      else:
+          raise ValueError("unknown_qoi_type")
   
   def __create_dataset_for_pareto_analysis(self, qoi_keys=""):
       """
@@ -419,11 +378,17 @@ class SimulationResults:
               
       # make dataset 
       self.pareto_dataset = []
-      for n, sim in enumerate(self.all_sims):
-          self.pareto_dataset.append(pyflamestk.pareto.Datapoint(n))
+      n_row, n_col = self.np_all_sims.shape
+      for i_row in range(n_row):
+          self.pareto_dataset.append(Datapoint(i_row))
           for qoi in self.qoi_keys:
-              idx = self.all_names.index(qoi)
-              self.pareto_dataset[n].addNumber(-sim[idx])
+              i_col = self.all_names.index(qoi)
+              self.pareto_dataset[i_row].addNumber(-self.np_all_sims[i_row,i_col])
+      #for n, sim in enumerate(self.all_sims):
+      #    self.pareto_dataset.append(pyflamestk.pareto.Datapoint(n))
+      #    for qoi in self.qoi_keys:
+      #        idx = self.all_names.index(qoi)
+      #        self.pareto_dataset[n].addNumber(-sim[idx])
          
   def calculate_pareto_set(self,qoi_keys):
       my_qoi_keys = copy.deepcopy(qoi_keys)
@@ -479,16 +444,12 @@ class SimulationResults:
         a numpy array with observations indexed in rows, and parameters
         and quantities of interst indexed in columns.  The column index is the
         same as the array in "self.all_names".
-        
-        Note:
-        
-        TODO:
-        
-        1)   A Newton-Ralphson method to get more accurate performance requirements
-        to prevent over culling of the Pareto set.
         """
-        
-        if 0 <= pct_kept <= 100.:
+
+        # TODO: A Newton-Ralphson method to get more accurate performance requirements
+        #       to prevent over culling of the Pareto set.
+       
+        if not(0 <= pct_kept <= 100.):
             errmsg = "pct_kept must be between 1 and 100, the value {} was passed."
             errmsg = errmsg.format(pct_kept)
             raise ValueError(errmsg)
@@ -1184,7 +1145,7 @@ def resample_from_kernel_density(sim_results,
     param_list_out = []
     for idx, row in enumerate(sim_results.param_sample.T):
         row_params = []
-        #print(idx,row)
+        is_good_row = True
         for param in param_list:
             param_value = ""
             if param in free_param_list:
@@ -1204,8 +1165,16 @@ def resample_from_kernel_density(sim_results,
                     param_value = 0.
                 else:
                     pass
+
+            # checkparam restrictions
+            if param.endswith('_rho'):
+                if param_value <= 0: 
+                    is_good_row = False
+
             row_params.append(param_value)
-        param_list_out.append(row_params)
+
+        if is_good_row is True:
+            param_list_out.append(row_params)
     print("\t number of parameter sets: {}".format(len(param_list_out)))
     print("\t writing to file...")
 
@@ -1220,7 +1189,7 @@ def resample_from_kernel_density(sim_results,
       str_out += "\n"
       str_out += "{} ".format(idx)
       for param_value in row:
-        str_out += "{} ".format(param_value)
+          str_out += "{} ".format(param_value)
     
     
     f = open(fname_param, mode='w')
@@ -1286,21 +1255,3 @@ def make_2d_pareto_plots(sim_results,
                 plt.show()
 
         
-if __name__ == '__main__':
-    try:
-        opts, args = getopt.getopt(sys.argv[1:],"l:s:")
-    except getopt.GetoptError:
-        print("pareto.py -l file1 -s file2 -l file3 ...")
-        sys.exit(2)
-
-    raw_vectors=[]
-    for opt, arg in opts:
-        if opt == '-l':
-            raw_vectors.append(readfile(arg,1.0))
-        elif opt == '-s':
-            raw_vectors.append(readfile(arg,-1.0))
-
-    dataset = create_dataset(raw_vectors)
-    nondominated_sort(dataset)
-    for s in dataset:
-        print(s)

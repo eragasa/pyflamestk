@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.optimize
+import copy
 
 class PyFlamesTkError(Exception):
     def __init__(self,value):
@@ -18,23 +19,60 @@ class Potential:
 
     Potential.__init__ must    
     """
-    def __init__(self, name, pot_name, atoms):
-        self.name = name
-        self.potential_name = pot_name
-        self.atoms = {}
-        for atom in atoms:
-            self.atoms[atom] = {}
-        self._parameters = NotImplemented
-        self._parameter_values
+    def __init__(self, 
+                 pot_name = None, 
+                 pot_type = None, 
+                 atoms = None, 
+                 potential = None):
+
+        self._name = None
+        self._type = None
+        self._atoms = []
+        self._parameters = []
+
+        if potential is not None:
+            # use copy constructor
+            self._copy_init(potential)
+        else:
+            if pot_name is None:
+                self._name = None
+            else:
+                self._name = pot_name
+
+            if pot_type is None:
+                self._type = None
+            else:
+                self._type = pot_type
+
+            if atoms is None:
+                self._atoms = []
+            else:
+                self._atoms = copy.copy(atoms)
+
+    # copy constructor
+    def _copy_init(self,obj):
+        self._name = obj._name
+        self._type = obj._type
+        self._atoms = list(atoms)
+
+        self._parameter_names = list(obj._parameter_names)
         
     def _make_parameter_dictionary(self):
-        
-        
+        raise NotImplementedError    
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, s):
+        self._name = s
+
     @property
     def parameter_names(self):
         raise NotImplementedError
         
-    @parameters.setter
+    @parameter_names.setter
     def parameter_names(self, p_list):
         raise NotImplementedError
         
