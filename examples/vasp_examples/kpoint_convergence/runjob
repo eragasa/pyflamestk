@@ -1,0 +1,21 @@
+#!/bin/bash
+#$ -N Mgo_333
+#$ -cwd
+#$ -pe mpi 24
+#$ -S /bin/bash
+#$ -q all2.q
+#$ -q all.q
+#$ -q eight.q
+#$ -e $JOB_NAME.e$JOB_ID
+#$ -o $JOB_NAME.o$JOB_ID
+
+vasp=/share/apps/vasp/vasp_5.3.5/vasp-std_heap
+/home/eugene/bin/vasp
+
+mpiexec=mpiexec.hydra
+
+source /share/apps/intel_2016/compilers_and_libraries_2016.3.210/linux/bin/compilervars.sh intel64
+
+$mpiexec $vasp > job.log
+echo "<--End-->"
+

@@ -1,17 +1,8 @@
 import subprocess
 import shutil
 import time
-import yaml
-import numpy
-import math
 import os
-
-import pyflamestk.base
-
-def make_lammps_structure_file(structure, fname_out, sym_order):
-  structure_file = StructureFile()
-  structure_file.structure = structure
-  structure_file.write(fname_out, sym_order)
+import pyflamestk.base as base
 
 class Simulation:
 
@@ -107,33 +98,29 @@ class InputFile:
     str_out += "print \"lammps_sim_done\"\n"
     return str_out
   
-class StructureFile:
-   def __init__(self):
-      self.structure = ""
+class Structure(base.Structure):
+   def __init__(self,obj):
+       base.Structure.__init__(self,obj)
 
    def write(self, filename_out, symbol_list, atom_style):
       print("writing structure to {}".format(filename_out))
-      structure = self.structure
-      structure = self.structure
-      total_number_of_atoms      = structure.getNumberOfAtoms(symbol='all')
-      total_number_of_atom_types = len(structure.getSymbolList())
 
-      xlo                        = 0.0
-      xhi                        = structure.h_matrix[0][0]
-      ylo                        = 0.0
-      yhi                        = structure.h_matrix[1][1]
-      zlo                        = 0.0
-      zhi                        = structure.h_matrix[2][2]
-      xy                         = structure.h_matrix[0][1]
-      xz                         = structure.h_matrix[0][2]
-      yz                         = structure.h_matrix[1][2]
+      xlo   = 0.0
+      xhi   = self.h_matrix[0,0]
+      ylo   = 0.0
+      yhi   = self.h_matrix[1,1]
+      zlo   = 0.0
+      zhi   = self.h_matrix[2,2]
+      xy    = self.h_matrix[0][1]
+      xz    = self.h_matrix[0][2]
+      yz    = self.h_matrix[1][2]
 
       file = open(filename_out,'w')
       # TODO: want to add more information such as sc, encoded on this first line.
-      file.write("# {}\n".format(symbol_list))
+      file.write("# {}\n".format(self.symbols))
       file.write("\n")
-      file.write("{} atoms\n".format(total_number_of_atoms))
-      file.write("{} atom types\n".format(total_number_of_atom_types))
+      file.write("{} atoms\n".format(self.get_number_of_atoms()))
+      file.write("{} atom types\n".format(len(self.symbols)))
       file.write("\n")
       file.write("{:10.4f} {:10.4f} xlo xhi\n".format(xlo, xhi))
       file.write("{:10.4f} {:10.4f} ylo yhi\n".format(ylo, yhi))
@@ -146,32 +133,35 @@ class StructureFile:
 
       atom_id = 1
       for i_symbol, symbol in enumerate(symbol_list):
-        for i_atom, atom in enumerate(structure.atomList):
+        for i_atom, atom in enumerate(self.atoms):
           if (atom.symbol == symbol):
             if atom_style == 'atomic':
               file.write("{} {} {:10.4f} {:10.4f} {:10.4f}\n".format(atom_id, 
                                                                      i_symbol + 1, 
-                                                                     structure.h_matrix[0][0]*atom.position[0],\
-                                                                     structure.h_matrix[1][1]*atom.position[1],\
-                                                                     structure.h_matrix[2][2]*atom.position[2]))
+                                                                     self.h_matrix[0,0]*atom.position[0],\
+                                                                     self.h_matrix[1,1]*atom.position[1],\
+                                                                     self.h_matrix[2,2]*atom.position[2]))
               atom_id += 1
             elif atom_style == 'charge':
-              #TODO: the style of this file is atom_id, atom_type, charge, x, y, z
-              # a dummy charge of q = 1 is put here, but might neeed to be improved in the future.
-              q = 1
-              file.write("{} {} {:10.4f} {:10.4f} {:10.4f} {:10.4f}\n".format(atom_id, 
+                #TODO: the style of this file is atom_id, atom_type, charge, x, y, z
+                # a dummy charge of q = 1 is put here, but might neeed to be improved in the future.
+                q = 1
+                file.write("{} {} {:10.4f} {:10.4f} {:10.4f} {:10.4f}\n".format(atom_id, 
                                                                      i_symbol + 1,
                                                                      q,
-                                                                     structure.h_matrix[0][0]*atom.position[0],\
-                                                                     structure.h_matrix[1][1]*atom.position[1],\
-                                                                     structure.h_matrix[2][2]*atom.position[2]))
-              atom_id += 1
+                                                                     self.h_matrix[0,0]*atom.position[0],\
+                                                                     self.h_matrix[1,1]*atom.position[1],\
+                                                                     self.h_matrix[2,2]*atom.position[2]))
+                atom_id += 1
       file.close()
 
+def make_lammps_structure_file(structure, fname_out, sym_order):
+    structure_file = Structure(structure)
+    structure_file.write(fname_out, sym_order)
 # various helper functions
 
 def checkLammpsSimulationDone(fname_lmps_log):
-  lines = pyflamestk.base.tail(fname = fname_lmps_log, n_lines = 1)
+  lines = base.tail(fname = fname_lmps_log, n_lines = 1)
   if 'lammps_sim_done' in  lines:
     return True
   else:

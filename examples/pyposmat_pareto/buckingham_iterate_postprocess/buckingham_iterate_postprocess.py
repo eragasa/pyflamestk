@@ -2,7 +2,7 @@
 import pyflamestk.pyposmat
 import pyflamestk.pareto
 import matplotlib.pyplot as plt
-from matplotlib.patches import cm
+#from matplotlib.patches import cm
 import numpy as np
 import copy
 
@@ -19,16 +19,15 @@ param_list_not_free = ['chrg_O',
                        'p_MgMg_a', 'p_MgMg_c', 'p_MgMg_rho',
                        'p_MgO_c']
 
-qoi_type        = "abserr"
-qoi_key     = ['MgO_NaCl_latt', 'MgO_NaCl_B', 'MgO_NaCl_G']
+qoi_type     = "abserr"
+qoi_keys     = ['MgO_NaCl_latt', 'MgO_NaCl_B', 'MgO_NaCl_G']
  
 pct_kept_each_iteration = 50           
 
 #TODO:  do this programmatically
 n_iterations = 10
 
-# do pareto analysis on iteration sets
-sim_results = []
+# do pareto analysis on iteration set
 
 def write_pareto_set_to_file(sim_results, fname_out):
     """
@@ -39,26 +38,7 @@ def write_pareto_set_to_file(sim_results, fname_out):
     """
     err_msg = "write_pareto_set_to_file() not implemented"
     raise NotImplementedError(err_msg)
-for idx in range(n_iterations):
     
-    sim_results.append(pyflamestk.pareto.SimulationResults())
-    fname_results = "iter_{:03d}/sim_results_{:03d}.dat".format(idx,idx)
-    sim_results[idx].read_simulation_results(fname_in=fname_results)
-    sim_results[idx].set_qoi_type(qoi_type)
-    
-    #TODO: read this from configuration file
-    sim_results[idx].qoi_values = {}
-    sim_results[idx].qoi_values['MgO_NaCl_latt'] = 4.1212
-    sim_results[idx].qoi_values['MgO_NaCl_B']    = 226.
-    sim_results[idx].qoi_values['MgO_NaCl_G']    = 92.
-    
-    sim_results[idx].calculate_pareto_set(qoi_keys=qoi_keys)
-    sim_results[idx].cull_by_percentile(pct_kept=pct_kept_each_iteration)
-    sim_results[idx].calculate_parameter_estimates(param_list=param_list)
-    sim_results[idx].calculate_qoi_estimates(qoi_keys=qoi_keys)
-
-import sys
-sys.exit()
 
 #%%
 import re
@@ -89,11 +69,12 @@ class SimulationResultsAggregator:
         from each of the individual pareto sets from each iteration.
     
     """
-    def __init__(self, sim_results,
+    def __init__(self,
                  param_list="",
                  qoi_list="",
                  qoi_type="abserr",
-                 qoi_keys=""):
+                 qoi_keys=None,
+                 n_iterations=10):
         """
         
         Arguments:
@@ -105,12 +86,12 @@ class SimulationResultsAggregator:
             parameter list will be taken from sim_results[0].param_list
         """
         
-        self.sim_results  = sim_results
         self.qoi_type = qoi_type
         self.qoi_err_type = qoi_type
-        
+        self.n_iterations = n_iterations
+        self.__read_sim_results()
         # set qoi keys
-        if qoi_keys == "":
+        if qoi_keys == None:
             #TODO: This is a really stupid way of doing this because 
             #I really coded up pyflamestk.pareto.SimulationResults wrong
             #pyflamestk.pareto.SimulationResults should be fixed, but this
@@ -128,25 +109,26 @@ class SimulationResultsAggregator:
         
         # set the parameter list
         if param_list == "":
-            self.param_list = sim_results[0].param_names.copy()
+            self.param_list = self.sim_results[0].param_names.copy()
         else:
             self.param_list = param_list
             
         # set the qoi list
         if qoi_list == "":
-            self.qoi_list = sim_results[0].qoi_names.copy()
+            self.qoi_list = self.sim_results[0].qoi_names.copy()
         else:
             self.qoi_list = qoi_list
             
         self.pareto_sets = []              # intialize
-        self.aggregate_dataset = []       # intialize
+        self.aggregate_dataset = []        # intialize
         self.aggregated_pareto_set = []    # intialize
 
-        self.n_iterations = len(sim_results)            
+        self.n_iterations = len(self.sim_results)            
         self.pareto_set_idx = self.param_list + self.qoi_list
 
         self.__aggregate_pareto_sets()
         self.__calculate_aggregate_pareto_set()
+        self.__calculate_parameter_evolution()
         
     def report(self):
         self.get_number_of_datapoints()
@@ -168,8 +150,78 @@ class SimulationResultsAggregator:
                 p_value = self.sim_results[i].np_all_sims[:,p_idx].mean()
                 p_std   = self.sim_results[i].np_all_sims[:,p_idx].std()
                 print("{} {} {} {}".format(i,param,p_value,p_std))
-
+                
+        print("Writing Evolution of Parameter Values")
+        str_out = "iter_id"
+        for p in self.param_list:
+            if p != 'sim_id':
+                str_out += "{}_mu {}_sigma ".format(p,p)
+        str_out += "\n"
             
+        for i in range(1, self.n_iterations):
+            str_out += "{} ".format(i)
+            for p in self.param_list:
+                if p != 'sim_id':
+                    p_idx   = self.sim_results[i].all_names.index(p)
+                    p_value = self.sim_results[i].np_all_sims[:,p_idx].mean()
+                    p_std   = self.sim_results[i].np_all_sims[:,p_idx].std()
+                    str_out += "{} {} ".format(p_value,p_std)
+            str_out += "\n"
+        #print(str_out)        
+            
+    def __calculate_parameter_evolution(self):
+        #create numpy array for evolution of numpy values
+        self.param_evol_names = ['iter_id']
+        for p in self.param_list:
+            if p != 'sim_id':
+                self.param_evol_names.append("{}_mu".format(p))
+                self.param_evol_names.append("{}_sigma".format(p))
+
+        ps_evolution = []
+        for i in range(1, self.n_iterations):
+            row = []
+            row.append(i)
+            for p in self.param_list:
+                if p != 'sim_id':
+                    p_idx   = self.sim_results[i].all_names.index(p)
+                    p_value = self.sim_results[i].np_all_sims[:,p_idx].mean()
+                    p_std   = self.sim_results[i].np_all_sims[:,p_idx].std()
+                    print(p,p_idx,p_value,p_std)
+                    row.append(p_value)
+                    row.append(p_std)
+            ps_evolution.append(row)
+        
+        self.param_evol_values = np.array(ps_evolution)
+        
+
+    def __read_sim_results(self):
+        self.sim_results = []
+        for idx in range(self.n_iterations):
+            fname_results = "iter_{:03d}/sim_results_{:03d}.dat".format(idx,idx)
+            fname_pareto  = "iter_{:03d}/pareto_results_{:03d}.dat".format(idx,idx)
+            fname_cull    = "iter_{:03d}/cull_results_{:03d}.dat".format(idx,idx)            
+            
+            self.sim_results.append(pyflamestk.pareto.SimulationResults())
+            self.sim_results[idx].read_simulation_results(fname_in=fname_results)
+            self.sim_results[idx].set_qoi_type(qoi_type)
+            
+            #TODO: read this from configuration file
+            self.sim_results[idx].qoi_values = {}
+            self.sim_results[idx].qoi_values['MgO_NaCl_latt'] = 4.1212
+            self.sim_results[idx].qoi_values['MgO_NaCl_B']    = 226.
+            self.sim_results[idx].qoi_values['MgO_NaCl_G']    = 92.
+            
+            #TODO: if filename does not exist
+            self.sim_results[idx].calculate_pareto_set(qoi_keys=qoi_keys)
+            #sim_results[idx].write(set_type='pareto',fname='pareto.dat')
+            
+            #TODO: if filename does not exist
+            self.sim_results[idx].cull_by_percentile(pct_kept=pct_kept_each_iteration)
+            #sim_results[idx].write(set_type='cull',fname='cull.dat')
+
+            self.sim_results[idx].calculate_parameter_estimates(param_list=param_list)
+            self.sim_results[idx].calculate_qoi_estimates(qoi_keys=qoi_keys)
+ 
     def get_number_of_datapoints(self):
         self.n_datapoints = []
         self.total_datapoints = 0
@@ -277,11 +329,27 @@ class SimulationResultsAggregator:
         return copy.deepcopy(self.pareto_dataset)
         
                   
-ps_aggregator = SimulationResultsAggregator(sim_results=sim_results)
+ps_aggregator = SimulationResultsAggregator(n_iterations=n_iterations)
 ps_aggregator.report()
 
+for p in ps_aggregator.param_list:
+    if p != 'sim_id':
+        p_mu_idx = ps_aggregator.param_evol_names.index("{}_mu".format(p))
+        p_sigma_idx = ps_aggregator.param_evol_names.index("{}_sigma".format(p))
+        x_data = ps_aggregator.param_evol_values[:,0]
+        p_mu   = ps_aggregator.param_evol_values[:,p_mu_idx]
+        p_std  = ps_aggregator.param_evol_values[:,p_sigma_idx]
+        plt.plot(x_data,p_mu)
+        plt.plot(x_data,p_mu-p_std)
+        plt.plot(x_data,p_mu+p_std)
+        plt.ylabel(p)
+        plt.xlabel('iteration')
+        plt.show()
+
 #%%
-from matplotlib.pyplot import cm
+
+
+#%%
 
 for x_i, x_label in enumerate(ps_aggregator.qoi_err_keys):
     for y_i, y_label in enumerate(ps_aggregator.qoi_err_keys):
@@ -420,13 +488,13 @@ def make_2d_pareto_plots_with_external_data(sim_results,
                          'BG1.7',
                          bbox={'facecolor':'white', 'alpha':1.0, 'pad':2}) 
                         
-                x_idx_iterate   = sim_results_iterate.all_names.index(x_label)
-                y_idx_iterate   = sim_results_iterate.all_names.index(y_label)
+                #x_idx_iterate   = sim_results_iterate.all_names.index(x_label)
+                #y_idx_iterate   = sim_results_iterate.all_names.index(y_label)
 
-                plt.text(sim_results_iterate.np_all_sims[i,x_idx_iterate],
-                         sim_results_iterate.np_all_sims[i,y_idx_iterate],
-                         "X",
-                         bbox={'facecolor':'green', 'alpha':1.0, 'pad':2}) 
+                #plt.text(sim_results_iterate.np_all_sims[i,x_idx_iterate],
+                #         sim_results_iterate.np_all_sims[i,y_idx_iterate],
+                #         "X",
+                #         bbox={'facecolor':'green', 'alpha':1.0, 'pad':2}) 
                          
                             
                 plt.axis([0,
@@ -447,16 +515,196 @@ sim_results_extern = pyflamestk.pareto.SimulationResults()
 sim_results_extern.read_simulation_results(fname_in=fname_results_2)
 sim_results_extern.set_qoi_type(qoi_type)
 
-fname_results_3 = "results_iterate.out"          # original data                
+fname_results_3 = "iter_009/sim_results_009.dat"      # original data                
 sim_results_iterate = pyflamestk.pareto.SimulationResults()
-sim_results_iterate.read_simulation_results(fname_in=fname_results_2)
+sim_results_iterate.read_simulation_results(fname_in=fname_results_3)
 sim_results_iterate.set_qoi_type(qoi_type)
 
 
-make_2d_pareto_plots_with_external_data(sim_results=sim_results[2],
+make_2d_pareto_plots_with_external_data(sim_results=ps_aggregator.sim_results[9],
                                         sim_results_extern=sim_results_extern,
                                         sim_results_iterate=sim_results_iterate,
                                         i_iterate = 2)
 
-#------------------------------------------------------------------------------
+i_iter = 9
+n_row, n_col = ps_aggregator.sim_results[9].np_pareto_set.shape
 
+
+good_rows = []
+for i_row in range(n_row):
+    
+    is_better = True
+    
+    str_out_err = ""
+    for qoi in qoi_keys:
+        qoi_err = "{}_{}".format(qoi,qoi_type)
+
+        qoi_idx     = ps_aggregator.sim_results[i_iter].all_names.index(qoi_err)
+        qoi_err_val = ps_aggregator.sim_results[i_iter].np_pareto_set[i_row,qoi_idx]
+
+        qoi_idx_extern     = sim_results_extern.all_names.index(qoi_err)
+        qoi_err_val_extern = sim_results_extern.np_all_sims[:,qoi_idx_extern].min()
+
+        if qoi_err_val > qoi_err_val_extern:
+            str_out_err += "\t{}: {:.4f} > {:.4f}\n".format(qoi_err,qoi_err_val,qoi_err_val_extern)
+            is_better = False
+        else:
+            str_out_err += "\t{}: {:.4f} < {:.4f}\n".format(qoi_err,qoi_err_val,qoi_err_val_extern)
+    print(i_row)
+    print(str_out_err)
+    
+    str_out = "{:02} ".format(i_row)
+    if is_better == True:
+        good_rows.append(i_row)
+        for p in param_list:
+            p_idx = ps_aggregator.sim_results[9].all_names.index(p)
+            p_val = ps_aggregator.sim_results[9].np_pareto_set[i_row,p_idx]
+
+            #str_out += "{} ".format(p_val)
+            
+        for qoi in qoi_keys:
+            qoi_idx = ps_aggregator.sim_results[i_iter].all_names.index(qoi)
+            qoi_val = ps_aggregator.sim_results[i_iter].np_pareto_set[i_row,qoi_idx]
+            str_out += "{:10.4f} ".format(qoi_val)
+    else:
+        str_out += "{:10}\n".format('FAILURE')
+        str_out += str_out_err
+    print(str_out)
+
+#%%
+
+# This code created plots for S. Phillpot's slides at MRS.
+i_iter = 9
+for ix, x in enumerate(qoi_keys):
+    for iy, y in enumerate(qoi_keys):
+        if x != y and ix < iy:
+
+            # determine key for qoi error            
+            x_key = "{}_{}".format(x,qoi_type)
+            y_key = "{}_{}".format(y,qoi_type)
+            
+            # get x-axis pareto data
+            x_i = ps_aggregator.sim_results[i_iter].all_names.index(x_key)        
+            x_v = ps_aggregator.sim_results[i_iter].np_pareto_set[good_rows,x_i]
+
+            # get y-axis pareto data
+            y_i = ps_aggregator.sim_results[i_iter].all_names.index(y_key)        
+            y_v = ps_aggregator.sim_results[i_iter].np_pareto_set[good_rows,y_i]
+
+            # get comparative values
+            x_idx_extern   = sim_results_extern.all_names.index(x_key)
+            y_idx_extern   = sim_results_extern.all_names.index(y_key)
+
+            plt_handles = []
+
+            if qoi_type not in ['abserr','nabserr','sqerr','nsqerr']:
+                plt_handles.append(plt.scatter(ps_aggregator.sim_results[9].qoi_values[x_key],
+                                               ps_aggregator.sim_results[9].qoi_values[y_key],
+                                               label='Experimental',
+                                               color='k'))
+
+            plt_handles.append(plt.scatter(x_v,y_v,color='y',label='Pareto'))                
+            plt_handles.append(plt.scatter(sim_results_extern.np_all_sims[0,x_idx_extern],
+                                           sim_results_extern.np_all_sims[0,y_idx_extern],
+                                           label='LC+2.0',color='r'))
+                       
+            plt_handles.append(plt.scatter(sim_results_extern.np_all_sims[1,x_idx_extern],
+                                           sim_results_extern.np_all_sims[1,y_idx_extern],
+                                           label='BG+2.0',color='g'))
+
+            plt_handles.append(plt.scatter(sim_results_extern.np_all_sims[2,x_idx_extern],
+                                           sim_results_extern.np_all_sims[2,y_idx_extern],
+                                           label='BG+1.7',color='b'))
+            plt.xlabel(x_key)
+            plt.ylabel(y_key)
+            
+            x_axis_min = min(x_v.min(),
+                             sim_results_extern.np_all_sims[[0,1,2],x_idx_extern].min())
+            x_axis_max = max(x_v.max(),
+                             sim_results_extern.np_all_sims[[0,1,2],x_idx_extern].max())
+            y_axis_min = min(y_v.min(),
+                             sim_results_extern.np_all_sims[[0,1,2],y_idx_extern].min())
+            y_axis_max = max(y_v.max(),
+                             sim_results_extern.np_all_sims[[0,1,2],y_idx_extern].max())
+            x_length = x_axis_max - x_axis_min
+            y_length = y_axis_max - x_axis_min
+            x_axis_max = x_axis_max + 0.1 * x_length
+            y_axis_max = y_axis_max + 0.1 * y_length
+            
+            
+            
+
+            plt.legend(handles=plt_handles,loc='lower right')
+            plt.axis([x_axis_min,x_axis_max,y_axis_min,y_axis_max])
+            plt.show()
+            
+#%% 3D pareto plot
+
+i_iter = 2
+x_i = ps_aggregator.sim_results[i_iter].all_names.index('MgO_NaCl_G_abserr')        
+x_v = ps_aggregator.sim_results[i_iter].np_pareto_set[good_rows,x_i]
+
+# get y-axis pareto data
+y_i = ps_aggregator.sim_results[i_iter].all_names.index('MgO_NaCl_B_abserr')        
+y_v = ps_aggregator.sim_results[i_iter].np_pareto_set[good_rows,y_i]
+
+# get y-axis pareto data
+z_i = ps_aggregator.sim_results[i_iter].all_names.index('MgO_NaCl_latt_abserr')        
+z_v = ps_aggregator.sim_results[i_iter].np_pareto_set[good_rows,z_i]
+
+fig = plt.figure()
+tri = Delaunay(np.array([x_v,y_v]).T)
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_trisurf(x_v,y_v,z_v, triangles=tri.simplices, cmap=plt.cm.Spectral)
+ax.scatter(x_v, y_v, z_v)
+ax.set_xlabel('MgO_NaCl_G_abserr')
+ax.set_ylabel('MgO_NaCl_B_abserr')
+ax.set_zlabel('MgO_NaCL_latt')
+ax.view_init(45, 45)
+plt.show()
+
+#--------------------- ---------------------------------------------------------
+#%%
+
+all_names = param_list + qoi_keys
+
+all_names_idx = []
+for name in all_names:
+    all_names_idx.append(ps_aggregator.sim_results[i_iter].all_names.index(name))
+
+good_pot = ps_aggregator.sim_results[i_iter].np_pareto_set[:,:]
+good_pot = good_pot[good_rows,:]
+good_pot = good_pot[:,all_names_idx]
+
+n_rows, n_cols = good_pot.shape
+
+print("n_rows: {}".format(n_rows))
+print("n_cols: {}".format(n_cols))
+
+#header string
+str_out = ' '.join(all_names) + '\n'
+i=0
+for row in good_pot:
+    row_str = ['{:10.6f}'.format(n) for n in row]
+    row_str = ' '.join(row_str) + '\n'
+    row_str = row_str.lstrip()
+    str_out += row_str
+
+print(str_out)
+
+#%%
+all_names_idx = []
+for name in all_names:
+    all_names_idx.append(sim_results_extern.all_names.index(name))
+
+extern_pot = sim_results_extern.np_all_sims[:,:]
+extern_pot = extern_pot[:,all_names_idx]
+str_out = ' '.join(all_names) + '\n'
+i=0
+for row in extern_pot:
+    row_str = ['{:10.6f}'.format(n) for n in row]
+    row_str = ' '.join(row_str) + '\n'
+    row_str = row_str.lstrip()
+    str_out += row_str
+    
+print(str_out)

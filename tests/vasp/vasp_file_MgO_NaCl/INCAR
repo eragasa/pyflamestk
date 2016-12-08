@@ -1,0 +1,34 @@
+ SYSTEM = Si
+
+ Start parameter for this Run:
+   ISTART = 0           # start job, no WAVECAR file
+   NWRITE = 2           # vebosity flag
+   LPETIM=F             # write-flag & timer
+   PREC = Accurate          
+   ALGO = Fast          # Davidson for initial phase, RMM-DIIS for final phase
+   LREAL = .FALSE.      # real space projection 
+   ISYM = 2             # 0 - symmetry on, 1 - symmetry off 
+   
+Electronic Relaxation 1
+   ENCUT = 500          # energy cutoff used in calculations
+   NELM = 300           # number of electronic relaxation steps
+   NELMIN = 4           # minimum of 2 electronic relaxation steps
+   NELMDL = -5          # no update of charge for 3 steps
+   EDIFF  = 1E-08       # accuracy for electronic minimization
+   ADDGRID = .TRUE.
+ 
+Ionic Relaxation
+   IBRION = 2           # 1 - DIIS, 2 - CG, 3 - Damped MD
+   NSW = 20             # number of ionic relaxation steps
+   EDIFFG = 0.1E-02     # accuracy for ionic minimization
+   MAXMIN = 80          # keep dielectric function between minimizations
+   POTIM = .5
+
+DoS related values
+   ISMEAR =   0         # method to determine partial occupancies     
+                        # -4-tet -1-fermi 1=Methfessel/Paxton 1.order
+   SIGMA  =   0.02      # broadening in eV
+
+Write Flags
+   LWAVE = T            # write WAVECAR
+   LCHARG = T           # write CHGCAR 

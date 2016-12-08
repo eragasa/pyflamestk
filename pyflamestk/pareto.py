@@ -6,6 +6,7 @@ import scipy.stats
 import numpy as np
 import sys, getopt
 import copy
+import os
 
 def is_outlier(points, thresh=3.5):
     """
@@ -120,6 +121,7 @@ class ParameterFileReader:
         self.params = []
         for idx in range(1,n_lines):
             self.params.append([float(num) for num in self.lines[idx].split()])
+
             
 class SimulationResults:
   """
@@ -138,11 +140,6 @@ class SimulationResults:
     # TODO: Initialization of variables here is very sloppy
     #       encapsulate variables that can be encapsulated
 
-    # initialize variables
-    self.all_sims    = []     # python array of all simulation data
-    self.pareto_set  = []     # python array of the pareto set
-
-
     # initialize variables [ATTRIBUTES]
     self.n_simulations = 0
     self.qoi_type = 'abserr'  # supported types: abserr, nabserr, sqerr, nsqerr
@@ -150,36 +147,128 @@ class SimulationResults:
     self.param_names = []     # array of parameter names
     self.qois = []
     self.qoi_keys = []        # TODO: horrible name fix
-    self.np_pareto_set = []
-    self.np_pareto_set_ids = []
-    self.np_all_sims = []     # numpy array of all simulation data
+    self.qoi_err_keys = []
+    self.qoi_err_type = 'abserr'    
+    # numpy array initialization, 
+    # set to None also indicates that calculations have not been done
+    self.np_all_sims = None              # numpy array of all simulation data
+    self.np_pareto_set_ids = None        # indexed with self.np_all_sims
+    self.np_pareto_set = None            # numpy array of the pareto set
+    self.np_pareto_set_cull = None       # numpy array of the culled pareto set
+
     self.n_resamples = 0
 
-    self.performance_requirements = {}
-    
     self.pareto_dataset = []
     self.pareto_set = []
     self.pareto_set_id = []
 
-  def read_simulation_results(self,fname_in):
-      """read simulations results from a file into a memory.
+    # filenames    
+    self.fname_log_file = None
+    self.fname_sim_results = None
+    self.fname_pareto = None
+    self.fname_cull= None
+     
+    self.__open_log_file()
+
+  def __del__(self):
+      self.__close_log_file()
+
+  # SOME FUNCTIONS HERE TO DEAL WITH APPLICATION LOGGING.          
+  def __open_log_file(self):
+      self.log_file = open(self.fname_log_file)
+  
+  def __close_log_file(self):
+      self.log_file.close()
+  
+  def __log(self,msg):
+      self.log_file.write(msg + "\n")
+      print(msg)
+    
+  def __write_pareto_set(self,
+                         fname_out='pareto.out',
+                         param_names=None,
+                         qoi_names=None):
+                             
+      if param_names == None:
+          param_names = self.param_names
+          
+      if qoi_names == None:
+          qoi_names = self.qoi_names
+
+      all_names = param_names + qoi_names          
+      pareto_set = self.np_pareto_set[:,all_names]
       
-      Args:
-          fname_in (str): the filename containing the simulation results from
-                          LAMMPS simulations
+      # create header
+      str_header = ""
+      for name in param_names:
+          str_header += "{} ".format(name)
+      str_header += "| "
+      for name in qoi_names:
+          str_header += "{} ".format(name)
+      str_header += "\n"
+
+      # create body
+      str_body = ""
+      for sim_result in pareto_set:
+          for k in sim_result:
+              str_body += "{} ".format(k)
+          str_body += "\n"
+          
+      # write results
+      f = open(fname_out,'w')
+      f.write(str_header)
+      f.write(str_body)
+      f.close()
+      
+  def __write_culled_set(self,fname):
+      raise NotImplemented("__write_culled_set not implemented")
+    
+  def write_analysis_files(self,
+                           dir_name = None,
+                           fname_pareto = 'pareto.dat',
+                           fname_culled = 'culled.dat',
+                           is_write_pareto = True, 
+                           is_write_culled_set = True):
+      """ writes a variety of analysis files
+      
+      Arguments:
+      
+      dir_name (str) - destination directory name in which to put files
+      
+      
       """
 
-      self.filename_in = fname_in
+      if not (dir_name == None):
+          self.working_path = dir_name
+      else:
+          # self.working_path stays the same
+          pass
       
-      # read file
-      f = open(self.filename_in)
+      # create directory if directory does not exist
+      os.makedirs(dir_name, exist_ok=True)
+      msg = "working path: {}".format(self.working_path)
+      self.__log(msg)
+                               
+      # write results of the pareto set
+      if is_write_pareto == True:
+          fname = os.path.join(dir_name,fname_pareto)
+          self.__log("writing pareto set to {}".format(fname))
+          self.__write_pareto_set(fname)
+          
+      # write results of the culled pareto set
+      if is_write_culled_set == True:
+          fname = os.path.join(dir_name,fname_pareto)
+          self.__log("writing culled pareto set to {}".format(fname))
+          self.__write_culled_set()
+
+  def __read_file(self, fname, file_type):
+ 
+      # read file into memory     
+      f = open(self.fname)          
       lines = f.readlines()
       f.close()
       n_lines = len(lines)               # number of lines in a file
-      self.n_lines = len(lines)
-      self.n_simulations = n_lines - 1
-      self.n_resamples = n_lines - 1
-    
+          
       # read header line
       line = lines[0]
       param_names = line.strip().split('|')[0].split()
@@ -187,7 +276,7 @@ class SimulationResults:
       all_names   = param_names + qoi_names
     
       # read simulations
-      self.all_sims = [] # initialization                     
+      all_sims = [] # initialization                     
       for i_line in range(1,n_lines):
         
           # the '|' separates the parameter values from the qois
@@ -205,14 +294,85 @@ class SimulationResults:
           for i, qoi in enumerate(qois):
               qois[i] = float(qoi)
         
-          self.all_sims.append(params+qois)
+          all_sims.append(params+qois)
         
-      self.param_names = param_names
-      self.qoi_names   = qoi_names
-      self.all_names   = all_names
-      self.np_all_sims = np.array(self.all_sims)
-    
-      self.__get_names_for_error_types()
+      if file_type == 'sim_results':
+          self.param_names = param_names
+          self.qoi_names   = qoi_names
+          self.all_names   = all_names
+          self.np_all_sims = np.array(all_sims)
+          self.__get_names_for_error_types()
+      
+
+
+  def read_simulation_results(self,
+                              fname_sims, 
+                              fname_pareto = None, 
+                              fname_cull = None):
+      """read simulations results from a file into a memory.
+      
+      Args:
+          fname_sims (str): the filename containing the simulation results from
+                          LAMMPS simulations
+          fname_pareto (str): the filename containing the pareto set results
+          fname_cull (str): the filename contain culled pareto set results
+      """
+
+      
+      self.filename_in = fname_in
+      
+      self.__read_file(fname_sims, 'sim_results')
+      
+      if not fname_pareto == None:
+          self.fname_pareto = fname_pareto
+          self.__read_file(fname_sims, 'pareto')
+          
+      if not fname_cull == None:
+          self.fname_cull = fname_cull
+          self.__read_file(fname_sims, 'cull')
+          
+#      # read file
+#      f = open(self.filename_in)
+#      lines = f.readlines()
+#      f.close()
+#      n_lines = len(lines)               # number of lines in a file
+#      self.n_lines = len(lines)
+#      self.n_simulations = n_lines - 1
+#      self.n_resamples = n_lines - 1
+#    
+#      # read header line
+#      line = lines[0]
+#      param_names = line.strip().split('|')[0].split()
+#      qoi_names   = line.strip().split('|')[1].split()
+#      all_names   = param_names + qoi_names
+#    
+#      # read simulations
+#      self.all_sims = [] # initialization                     
+#      for i_line in range(1,n_lines):
+#        
+#          # the '|' separates the parameter values from the qois
+#          params = lines[i_line].strip().split('|')[0].split()
+#          qois = lines[i_line].strip().split('|')[1].split()
+#          
+#          # parse parameters
+#          for i, param in enumerate(params):
+#              if i == 0:
+#                  params[i] = int(param)
+#              else:
+#                  params[i] = float(param)
+#            
+#          # parse qoi values
+#          for i, qoi in enumerate(qois):
+#              qois[i] = float(qoi)
+#        
+#          self.all_sims.append(params+qois)
+#        
+#      self.param_names = param_names
+#      self.qoi_names   = qoi_names
+#      self.all_names   = all_names
+#      self.np_all_sims = np.array(self.all_sims)
+#    
+#      self.__get_names_for_error_types()
 
   def set_qoi_type(self,qoi_type):
     self.qoi_type = qoi_type
@@ -271,14 +431,14 @@ class SimulationResults:
       self.__create_dataset_for_pareto_analysis(qoi_keys=my_qoi_keys)
       print("calculating pareto set...")
       pyflamestk.pareto.bruteforce_algo(self.pareto_dataset)
-      self.pareto_set_ids = []
-      self.pareto_set = []
     
       # mark pareto set
+      self.pareto_set_ids = []
       for s in self.pareto_dataset:
         if s.paretoStatus == 1:
           self.pareto_set_ids.append(s.id)
           self.pareto_set.append(s.vec)
+          
       self.pareto_set = -np.array(self.pareto_set)
       self.np_pareto_set = self.np_all_sims[self.pareto_set_ids]
       self.pareto_mean = np.mean(self.np_pareto_set)

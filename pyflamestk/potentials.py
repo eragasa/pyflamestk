@@ -24,12 +24,26 @@ class Potential:
         self.atoms = {}
         for atom in atoms:
             self.atoms[atom] = {}
-        self.parameter_list = {}
+        self._parameters = NotImplemented
+        self._parameter_values
+        
+    def _make_parameter_dictionary(self):
+        
+        
+    @property
+    def parameter_names(self):
+        raise NotImplementedError
+        
+    @parameters.setter
+    def parameter_names(self, p_list):
+        raise NotImplementedError
         
     def evaluate(self):
         pass
+    
     def set_parameter_list(self):
         pass
+    
     def get_parameter_list(self):
         pass
 
