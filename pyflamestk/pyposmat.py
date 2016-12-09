@@ -35,7 +35,8 @@ class PyPosmatEngine:
     self.supported_qoi = ['sp_ecoh','sp_pressure',
                           'min_ecoh','min_latt_xx','min_latt_yy','min_latt_zz',
                           'elas_c11','elas_c12','elas_c44',
-                          'elas_bulk','elas_shear']
+                          'elas_bulk','elas_shear',
+                          'e_surf', 'e_defect']
     self.supported_potentials = ['buckingham','eam']
 
     print("pyflamestk.pyposmat version 0.1")
@@ -44,7 +45,7 @@ class PyPosmatEngine:
                                   fname_config_qoi=fname_config_qoi)
                                   
     # initialization of member attributes
-    self.qoi = {}
+    self._qoi = {}
     self.lammps_sims = {}        
         #lammps_sims[sim_name]['structure','sim_type']
     self.potential_parameter_list = []
@@ -60,6 +61,10 @@ class PyPosmatEngine:
     self.check_potential_parameters()
 
     #self.write_lammps_potential_file()
+
+  @property
+  def qoi(self):
+      return self._qoi
 
   def evaluate_parameter_set(self, potential_parameters):
       potential_type = 'buckingham'        # TODO: GET RID OF MAGIC VARIABLE
@@ -811,7 +816,85 @@ class ConfigFile:
       self.config_dict = read_pyposmat_config_file(self.fname_config)
       return copy.deepcopy(self.config_dict)
     
-  
+class PyPosmatConfigFile:
+    
+    def __init__(self, fname_config = "pyposmat.config", is_read = True):
+        self._fname = fname_config
+        if is_read is True:
+            self._read()
+            
+    def read(self):
+        f = open(self._fname,'r')
+        lines = f.readlines()
+        f.close()
+        
+        for i_line, line in enumerate(lines):
+            if line.strip().startswith('#' or line.strip() == ''):
+                pass
+            else:
+                config_info = line.split('=')
+                if len(config_info) > 0:
+                    var    = config_info[0].strip()
+                    params = config_info[1].strip().strip('"').strip()
+                    params = [p.strip() for p in params.split(',')]
+                    if   var == 'structure':
+                        self._configure_structure(params)
+                    elif var == "lmps_sim_type":
+                        self._configure_lammps_simulation_type(params)
+                    elif var == "qoi_list":
+                        self._configure_qoi_list(params)
+                    elif var == "qoi":
+                        self._configure_qoi(params)
+                    elif var == "qoi_weights":
+                        self._configure_qoi_weights(params)
+                    elif var ==  "qoi_target":
+                        self._configure_qoi_target(params)
+                    elif var == "qoi_normfactor":
+                        self._configure_qoi_normalization_factor(params)
+                    else:
+                        self._config_dict[var] = params
+    def _configure_structure(self,params):            
+          str_name  = params.split(',')[0].strip()
+          str_fname = params.split(',')[1].strip()
+          str_type  = params.split(',')[2].strip()
+          self._config_dict['structures'][str_name] = {}
+          self._config_dict['structures'][str_name]['name'] = str_fname
+          self._config_dict['structures'][str_name]['type'] = str_type
+
+    def _configure_lammps_simulation_type(self,params):
+          sim_type     = params.split(',')[0].strip()
+          sim_location = params.split(',')[1].strip()
+          self._config_dict['lmps_sim_type'][sim_type] = sim_location
+                         
+    def _configure_qoi_list(self,params):
+        self._config_dict["qoi_list"] = list(params)
+        
+    def _configure_qoi(self,params):
+        n = len(args) - 2    # number of structures
+        q_name = params[0]     # qoi name
+        q_type = params[1]     # qoi type
+        q_structures = [args[i] for i in range(2,2 + n)]
+        self._config_dict['qoi'][q_name] = {}
+        self._config_dict['qoi'][q_name]['weight'] = None
+        self._config_dict['qoi'][q_name]['target'] = None
+        self._config_dict['qoi'][q_name]['type'] = q_type
+        self._config_dict['qoi'][q_name]['structures'] = q_structures
+
+    def _configure_qoi_weights(self,params):
+        q_name   = params[0]
+        q_weight = params[1]
+        self._config_dict['qoi'][q_name]['weight'] = q_weight
+        
+    def _configure_qoi_target(self,params):
+        q_name = params[0]
+        q_target = params[1]
+        self._config_dict['qoi'][q_name]['target'] = q_target
+
+    def _configure_qoi_normalization_factor(self,params):
+        qoi_name       = config_param.split(',')[0].strip()
+        qoi_normf      = float(config_param.split(',')[1].strip())
+        self._config_dict['qoi'][q_name]['n_factor'] = q_factor
+                
 def read_pyposmat_config_file(fname_config):
   config_dict = {}
   config_dict['structures'] = {}
@@ -943,52 +1026,52 @@ class PotentialConfigFile:
           return self.elements[pot_id]['charge']
           
 class QoiConfigFile:
-  def __init__(self, fname_config = "pyposmat.potential",is_read = True):
-    self.fname_config = fname_config
-    if is_read == True:
-      self.read()
+    def __init__(self, fname_config = "pyposmat.potential",is_read = True):
+        self.fname_config = fname_config
+        if is_read == True:
+            self.read()
       
-  def read(self):
-    self.qoi_info = {}
-    self.qoi_info['qoi'] = {}
-    file = open(self.fname_config)
-    for idx, line in enumerate(file.readlines()):
-        if line.strip().startswith('#'):
-            pass
-        elif line.strip() == '':
-            pass
-        else:
-            keyword = line.split('=')[0].strip()
-            params  = line.split('=')[1].strip()
-            if keyword == 'qoi_list':
-                qoi_list = params.split(',')
-                self.qoi_info[keyword] = qoi_list
-            elif keyword == 'define_qoi':
-                qoi_list      = params.split(',')
-                
-                qoi_name      = qoi_list[0]
-                qoi_variable  = qoi_list[1].strip()
-                qoi_structures = [qoi_list[i].strip() for i in range(2,len(qoi_list))]
-                
-                self.qoi_info['qoi'][qoi_name] = {}
-                self.qoi_info['qoi'][qoi_name]['variable']  = qoi_variable
-                self.qoi_info['qoi'][qoi_name]['structure'] = qoi_structures                
-            elif keyword == 'qoi_target':
-                qoi_list     = params.split(',')
-                
-                qoi_name     = qoi_list[0].strip()
-                qoi_target   = float(qoi_list[1].strip())
-                qoi_weight   = float(qoi_list[2].strip())
-                qoi_norm     = float(qoi_list[3].strip())
-                
-                self.qoi_info['qoi'][qoi_name]['target'] = qoi_target
-                self.qoi_info['qoi'][qoi_name]['weight'] = qoi_weight
-                self.qoi_info['qoi'][qoi_name]['norm']   = qoi_norm
-                
+    def read(self):
+        self.qoi_info = {}
+        self.qoi_info['qoi'] = {}
+        file = open(self.fname_config)
+        for idx, line in enumerate(file.readlines()):
+            if line.strip().startswith('#'):
+                pass
+            elif line.strip() == '':
+                pass
             else:
-                msg_err = "unknown qoi_keyword({})"
-                msg_err = msg_err.format(keyword)
-                raise ValueError(msg_err)
+                keyword = line.split('=')[0].strip()
+                params  = line.split('=')[1].strip()
+                if keyword == 'qoi_list':
+                    qoi_list = params.split(',')
+                    self.qoi_info[keyword] = qoi_list
+                elif keyword == 'define_qoi':
+                    qoi_list      = params.split(',')
+                
+                    qoi_name      = qoi_list[0]
+                    qoi_variable  = qoi_list[1].strip()
+                    qoi_structures = [qoi_list[i].strip() for i in range(2,len(qoi_list))]
+                
+                    self.qoi_info['qoi'][qoi_name] = {}
+                    self.qoi_info['qoi'][qoi_name]['variable']  = copy.copy(qoi_variable)
+                    self.qoi_info['qoi'][qoi_name]['structure'] = copy.copy(qoi_structures)                
+                elif keyword == 'qoi_target':
+                    qoi_list     = params.split(',')
+                
+                    qoi_name     = qoi_list[0].strip()
+                    qoi_target   = float(qoi_list[1].strip())
+                    qoi_weight   = float(qoi_list[2].strip())
+                    qoi_norm     = float(qoi_list[3].strip())
+                
+                    self.qoi_info['qoi'][qoi_name]['target'] = qoi_target
+                    self.qoi_info['qoi'][qoi_name]['weight'] = qoi_weight
+                    self.qoi_info['qoi'][qoi_name]['norm']   = qoi_norm
+                
+                else:
+                    msg_err = "unknown qoi_keyword({})"
+                    msg_err = msg_err.format(keyword)
+    S                raise ValueError(msg_err)
 
 def calculate_bulk_modulus(c11, c12):
   K = (c11+2*c12)/3.
