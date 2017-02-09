@@ -1,22 +1,48 @@
 #!/usr/bin/env python
-import os
-import copy
-import sys, getopt
-import numpy as np
 import pyflamestk.pyposmat
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import scipy.stats
+import numpy as np
+import sys, getopt
+import copy
+import os
 
-# This file contains primarily pareto analysis code for pyposmat
-# analysis.
-# Developers:
-# Eugene J. Ragasa, University of Florida, developed the original version
-#     of this code.
-# Dmitriy Morozov, Lawrence Berkeley Labs, provided speed ups for the
-#     Pareto versions of the code in Dec 2016.
+def is_outlier(points, thresh=3.5):
+    """
+    Returns a boolean array with True if points are outliers and False 
+    otherwise.
 
+    Parameters:
+    -----------
+        points : An numobservations by numdimensions array of observations
+        thresh : The modified z-score to use as a threshold. Observations with
+            a modified z-score (based on the median absolute deviation) greater
+            than this value will be classified as outliers.
 
+    Returns:
+    --------
+        mask : A numobservations-length boolean array.
+
+    References:
+    ----------
+        Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
+        Handle Outliers", The ASQC Basic References in Quality Control:
+        Statistical Techniques, Edward F. Mykytka, Ph.D., Editor. 
+
+        original code: http://stackoverflow.com/questions/11882393/matplotlib-disregard-outliers-when-plotting
+        date: 10/19/2016
+    """
+    if len(points.shape) == 1:
+        points = points[:,None]
+    median = np.median(points, axis=0)
+    diff = np.sum((points - median)**2, axis=-1)
+    diff = np.sqrt(diff)
+    med_abs_deviation = np.median(diff)
+
+    modified_z_score = 0.6745 * diff / med_abs_deviation
+
+    return modified_z_score > thresh
     
 def pareto_frontier_2d(Xs, Ys, maxX=True, maxY=True):
     '''
@@ -44,68 +70,36 @@ def pareto_frontier_2d(Xs, Ys, maxX=True, maxY=True):
     p_frontX = [pair[0] for pair in p_front]
     p_frontY = [pair[1] for pair in p_front]
     return p_frontX, p_frontY
+    
+def read_pareto_set(fname_in='pareto.in'):
+    pass
 
-def dominates(p1, p2):
-    """
-    original code: Eugene J. Ragasa, UF
-    """
-    for x,y in zip(p1,p2):
-        if y < x:
-            return False
-    return True
+def write_pareto_set(param_names,
+                     qoi_names,
+                     pareto_set, 
+                     fname_out='pareto.out'):
 
-def pareto_bruteforce(pts, indices = None):
-    """
-    original code: Eugene J. Ragasa, UF
-    """
-    if indices is None:
-        indices = list(range(len(pts)))
-    result = []
-    for i in indices:
-        for j in indices:
-            if i == j: continue
-            if dominates(pts[j], pts[i]):
-                break
-        else:
-            result.append(i)
-    return result
+    f = open(fname_out,'w')
 
-def pareto_merge(lo, hi, i, dim):
-    """
-    original code: Dmitriy Morozon, LBL
-    """
-    if len(lo) == 0 or len(hi) == 0:
-        return lo + hi
+    # write header line    
+    str_out = ""
+    for name in param_names:
+        str_out += "{} ".format(name)
+    str_out += "| "
+    for name in qoi_names:
+        str_out += "{} ".format(name)
+    str_out += "\n"
+    f.write(str_out)
 
-    survivors = set()
-    for j in range(dim):
-        if i == j: continue
-        m = min(p[j] for p in lo)
-        survivors.update(k for k in range(len(hi)) if hi[k][j] < m)
-
-    return lo + [hi[k] for k in survivors]
-
-def pareto(pts, indices = None, i = 0):
-    """
-    original code: Dmitriy Morozov, LBL
-    """
-    if indices is None:
-        indices = list(range(len(pts)))
-    l = len(indices)
-    if l <= 1:
-        return indices
-
-    if l < 1000:
-        return pareto_bruteforce(pts, indices)
-
-    indices.sort(key = lambda x: pts[x][i])     # lazy: should use partition instead
-
-    dim = len(pts[0])
-    optimalLo = pareto(pts, indices[:l//2], (i + 1) % dim)
-    optimalHi = pareto(pts, indices[l//2:], (i + 1) % dim)
-
-    return pareto_bruteforce(pts, optimalLo + optimalHi)     # lazy: FIXME
-    #return pareto_merge(optimalLo, optimalHi, i, dim)
+    # write body    
+    for myset in pareto_set:
+        str_out = ""
+        for item in myset:
+            str_out += "{} ".format(item)
+        str_out += "\n"
+    f.write(str_out)
+    
+    f.close()
     
 class ParameterFileReader:
     """
@@ -130,384 +124,320 @@ class ParameterFileReader:
 
             
 class SimulationResults:
-    """
+  """
   
-    Args:
+  Args:
       n_simulations (int): number of simulations read from the output file
-      qoi_type (str): supported qoi types are
-          'abserr' - absolute error
-    """
+      qoi_type (str): supported qoi types are (1) 'abserr' - absolute error,
+                      (2) 'nabserr' - normalized absolute error, 
+                      (3)'sqerr' - square error, and (4) 'nsqerr' - normalized 
+                      square error
+  """
+  def __init__(self):      
+    self.performance_requirements = {}
+    self.fname_pareto_out = "pareto.out"
 
-    @property
-    def n_simulations(self): 
-        return self._n_sims
+    # TODO: Initialization of variables here is very sloppy
+    #       encapsulate variables that can be encapsulated
+
+    # initialize variables [ATTRIBUTES]
+    self.n_simulations = 0
+    self.qoi_type = 'abserr'  # supported types: abserr, nabserr, sqerr, nsqerr
+    self.qoi_names   = []     # array of qoi names
+    self.param_names = []     # array of parameter names
+    self.qois = []
+    self.qoi_keys = []        # TODO: horrible name fix
+    self.qoi_err_keys = []
+    self.qoi_err_type = 'abserr'    
+
+    # numpy array initialization, 
+    # set to None also indicates that calculations have not been done
+    self.np_all_sims = None              # numpy array of all simulation data
+    self.np_pareto_set_ids = None        # indexed with self.np_all_sims
+    self.np_pareto_set = None            # numpy array of the pareto set
+    self.np_pareto_set_cull = None       # numpy array of the culled pareto set
+
+    self.n_resamples = 0
+
+    self.pareto_dataset = []
+    self.pareto_set = []
+    self.pareto_set_id = []
+
+    # filenames    
+    self.fname_log_file = "log.pyposmat"
+    self.fname_sim_results = None
+    self.fname_pareto = None
+    self.fname_cull= None
+
+    # filename handles
+    self.file_log = None
+     
+    self.__open_log_file()
+
+  def __del__(self):
+      self.__close_log_file()
+
+  # SOME FUNCTIONS HERE TO DEAL WITH APPLICATION LOGGING.          
+  def __open_log_file(self):
+      if self.file_log is None:
+          self.file_log = open(self.fname_log_file,'w')
   
-    @n_simulations.setter
-    def n_simulations(self, nsims):
-        self._n_sims = nsims
-
-    @property
-    def ref_qoi(self): return self._qoi_ref
-
-    @ref_qoi.setter
-    def qoi_ref(self, dict_qoi):
-        assert type(dict_qoi),dict
-        self._qoi_ref = dict_qoi
-        
-    @property
-    def names(self): return self._names
-
-    @property
-    def types(self): return self._types
-
-    @property
-    def qoi_err_type(self):
-        return self._qoi_err_type
-
-    @qoi_err_type.setter
-    def qoi_err_type(self, qe_type):
-        assert type(qe_type),str
-
-        # check to see if qoi_err_type is supported
-        if qe_type not in self._supported_qoi_err_types:
-            err_msg = 'unsupported qoi error type: {}'
-            err_msg = err_msg.format(qe_type)
-            raise ValueError(err_msg)
-
-        self._qoi_err_type = qe_type
-
-    @property
-    def qoi_names(self):
-        return self._qoi_names
-
-    @qoi_names.setter
-    def qoi_names(self, qnames):
-        self._qoi_names = qnames
-
-    @property
-    def parameter_names(self):
-        return self._param_names
-
-    @parameter_names.setter
-    def parameter_names(self, pnames):
-        self._param_names = pnames
-        
-    @property
-    def results(self): return self._results
-
-    @property
-    def pareto(self): return self._pareto
-
-    @property
-    def culled(self): return self._culled
-
-    def __init__(self):
-        self._supported_qoi_err_types = ['abserr', 'sqerr']
-
-        # filenames    
-        self.fname_log_file = "pyposmat.log"
-        self.fname_sim_results = None
-        self.fname_pareto = None
-        self.fname_cull= None
-
-        # initialize variables [ATTRIBUTES]
-        self._qoi_err_type = 'abserr' # qoi error type
-        self._n_sims = None # numer of simulations
-        self._names = None
-        self._types = None
-        self._param_names = [] # array of parameter names
-        self._qoi_names = [] # array of qoi names
-        self._err_names = []
-
-        # results
-        # set to None also indicates that calculations have not been done
-        self._pareto_set_ids = None          # indexed with self._results
-        self._results = None                 # numpy array of all simulation data
-        self._pareto = None                  # numpy array of the pareto set
-        self._cull = None                    # numpy array of the culled pareto set
-
-        self.performance_requirements = {}
-
-        # filename handles
-        self._file_log = None
-        self._log_format = None
-        self._open_log_file()
-
-    def __del__(self):
-        self._close_log_file()
-
-    # SOME FUNCTIONS HERE TO DEAL WITH APPLICATION LOGGING.          
-    def _open_log_file(self):
-        if self._file_log is None:
-            self._file_log = open(self.fname_log_file,'w')
+  def __close_log_file(self):
+      self.file_log.close()
   
-    def _close_log_file(self):
-        self._file_log.close()
-  
-    def _log(self,msg):
-        if self._log_format is None:
-            self._file_log.write(msg + "\n")
-            print(msg)
-        else:
-            msg = self._log_format.format(msg + "\n")
-            print(msg)
+  def __log(self,msg):
+      self.file_log.write(msg + "\n")
+      print(msg)
     
-    def write_pareto_set(self,fname_out='pareto.out'):
-        """
-        Write the pareto set to file.
 
-        This function prints the calculated pareto set to file.
-
-        Parameters:
-        fname_out - the filename (str) (default: pareto.out)
-
-        Returns:
-        None
-
-        """
-
-        # create header
-        str_names = ", ".join(self._names) + "\n"
-        str_types = ", ".join(self._types) + "\n"
-
-        # create body
-        str_body = ""
-        for sim_result in self._pareto:
-            str_body += ", ".join([str(num) for num in sim_result]) + "\n"
+  def __write_pareto_set(self,
+                         fname_out='pareto.out',
+                         param_names=None,
+                         qoi_names=None):
+                             
+      if param_names == None:
+          param_names = self.param_names
           
-        # write results
-        f = open(fname_out,'w')
-        f.write(str_names)
-        f.write(str_types)
-        f.write(str_body)
-        f.close()
+      if qoi_names == None:
+          qoi_names = self.qoi_names
 
-    def write_culled_set(self,fname_out='culled.out'):
-        # create header
-        str_names = ", ".join(self._names) + "\n"
-        str_types = ", ".join(self._types) + "\n"
+      all_names = param_names + qoi_names          
+      pareto_set = self.np_pareto_set[:,all_names]
+      
+      # create header
+      str_header = ""
+      for name in param_names:
+          str_header += "{} ".format(name)
+      str_header += "| "
+      for name in qoi_names:
+          str_header += "{} ".format(name)
+      str_header += "\n"
 
-        # create body
-        str_body = ""
-        for sim_result in self._culled:
-            str_body += ", ".join([str(num) for num in sim_result]) + "\n"
+      # create body
+      str_body = ""
+      for sim_result in pareto_set:
+          for k in sim_result:
+              str_body += "{} ".format(k)
+          str_body += "\n"
           
-        # write results
-        f = open(fname_out,'w')
-        f.write(str_names)
-        f.write(str_types)
-        f.write(str_body)
-        f.close()
+      # write results
+      f = open(fname_out,'w')
+      f.write(str_header)
+      f.write(str_body)
+      f.close()
+      
+  def __write_culled_set(self,fname):
+      raise NotImplemented("__write_culled_set not implemented")
     
-    def write_analysis_files(self,
-                             dir_name = None,
-                             fname_pareto = 'pareto.dat',
-                             fname_culled = 'culled.dat',
-                             is_write_pareto = True, 
-                             is_write_culled_set = True):
-        """
-        writes a variety of analysis files
+  def write_analysis_files(self,
+                           dir_name = None,
+                           fname_pareto = 'pareto.dat',
+                           fname_culled = 'culled.dat',
+                           is_write_pareto = True, 
+                           is_write_culled_set = True):
+      """ writes a variety of analysis files
       
-        Arguments:
+      Arguments:
       
-        dir_name (str) - destination directory name in which to put files
-        """
+      dir_name (str) - destination directory name in which to put files
+      
+      
+      """
 
-        if not (dir_name == None):
-            self.working_path = dir_name
-        else:
-            # self.working_path stays the same
-            pass
-
-        # create directory if directory does not exist
-        os.makedirs(dir_name, exist_ok=True)
-        msg = "working path: {}".format(self.working_path)
-        self.__log(msg)
-
-        # write results of the pareto set
-        if is_write_pareto == True:
-            fname = os.path.join(dir_name,fname_pareto)
-            self.__log("writing pareto set to {}".format(fname))
-            self.__write_pareto_set(fname)
+      if not (dir_name == None):
+          self.working_path = dir_name
+      else:
+          # self.working_path stays the same
+          pass
+      
+      # create directory if directory does not exist
+      os.makedirs(dir_name, exist_ok=True)
+      msg = "working path: {}".format(self.working_path)
+      self.__log(msg)
+                               
+      # write results of the pareto set
+      if is_write_pareto == True:
+          fname = os.path.join(dir_name,fname_pareto)
+          self.__log("writing pareto set to {}".format(fname))
+          self.__write_pareto_set(fname)
           
-        # write results of the culled pareto set
-        if is_write_culled_set == True:
-            fname = os.path.join(dir_name,fname_pareto)
-            self.__log("writing culled pareto set to {}".format(fname))
-            self.__write_culled_set()
+      # write results of the culled pareto set
+      if is_write_culled_set == True:
+          fname = os.path.join(dir_name,fname_pareto)
+          self.__log("writing culled pareto set to {}".format(fname))
+          self.__write_culled_set()
 
-    def __read_file(self, fname, file_type):
+  def __read_file(self, fname, file_type):
  
-        # read file into memory
-        f_in = open(fname,'r')
-        lines_in = f_in.readlines()
-        f_in.close()
+      # read file into memory     
+      f = open(fname)          
+      lines = f.readlines()
+      f.close()
 
-        if file_type == 'results':
-            # read header lines
-            self._names = [n.strip() for n in lines_in[0].strip().split(',')]
-            self._types = [t.strip() for t in lines_in[1].strip().split(',')]
-        elif file_type == 'pareto':
-            # check to see if pareto header line is the same as the pareto line
-            if self._names == [n.strip() for n in lines_in[0].strip().split(',')]:
-                self._log("pareto names header file matches result file")
-            else:
-                if self._names is None:
-                    errmsg = "The results file must be read before the pareto file"
-                    raise RuntimeError(errmsg)
-                else:
-                    errmsg = "The pareto names header does not match results file"
-                    raise RuntimeError(errmsg)
-
-            # check to see if pareto types header line is the same as the pareto line
-            if self._types == [t.strip() for t in lines_in[1].strip().split(',')]:
-                self._log("pareto types header matches results types header")
-            else:
-                if self._types is None:
-                    errmsg = "The results file must be read before the pareto file"
-                    raise RuntimeError(errmsg)
-                else:
-                    errmsg = "the pareto types header does not match results file"
-                    raise RuntimeError(errmsg)
-
-        results = []
-        for i in range(2,len(lines_in)):
-            result =  [v.strip() for v in lines_in[i].strip().split(',')]
-            for j,t in enumerate(self._types):
-                if t == "sim_id":
-                    result[j] = int(float(result[j]))
-                else:
-                    # everything else is a float
-                    result[j] = float(result[j])
-            results.append(result)
-
-        # convert into numpy file
-        if file_type == 'results':
-            self._param_names = [self._names[i] for i,v in enumerate(self._types) if v == 'param']
-            self._qoi_names = [self._names[i] for i,v in enumerate(self._types) if v == 'qoi']
-            self._err_names = [self._names[i] for i,v in enumerate(self._types) if v == 'err']
-            self._results = np.array(results)
-        elif file_type == 'pareto':
-            self._pareto = np.array(results)
-
-    def read_simulation_results(self,
-                                fname_sims, 
-                                fname_pareto = None, 
-                                fname_cull = None):
-        """
-        read simulations results from a file into a memory.
-      
-        Args:
-        fname_sims (str): the filename containing the simulation results from
-          LAMMPS simulations
-        fname_pareto (str): the filename containing the pareto set results
-        fname_cull (str): the filename contain culled pareto set results
-        """
-      
-        self.fname_sims = fname_sims
-        self.__read_file(fname_sims, 'results')
+      n_lines = len(lines)               # number of lines in a file
+          
+      # read header line
+      line = lines[0]
+      param_names = line.strip().split('|')[0].split()
+      qoi_names   = line.strip().split('|')[1].split()
+      all_names   = param_names + qoi_names
+    
+      # read simulations
+      all_sims = [] # initialization                     
+      for i_line in range(1,n_lines):
         
-        # remove rows that have NaN as result
-        rows_to_remove = []
-        for i in range(1,self._results.shape[0]):
-            if np.isnan(self._results[i,:]).any():
-                rows_to_remove.append(i)
-        self._results = np.delete(self._results,rows_to_remove,axis=0)
-      
-        if fname_pareto is not None:
-            self.fname_pareto = fname_pareto
-            self.__read_file(fname_pareto, 'pareto')
+          # the '|' separates the parameter values from the qois
+          params = lines[i_line].strip().split('|')[0].split()
+          qois   = lines[i_line].strip().split('|')[1].split()
           
-        if fname_cull is not None:
-            self.fname_cull = fname_cull
-            self.__read_file(fname_cull, 'cull')
-          
-    def _create_dataset_for_pareto_analysis(self, err_names=None):
-        """
-        Creates a dataset for pareto analysis
-
-        This method creates a dataset necessary for pareto analysis
-
-        Arguments:
-        err_names - a list of strings containing the identifiers for the error
-        """
-
-        print("creating dataset for pareto analysis")
-         
-        if err_names is None:
-            err_names = self._err_names
+          # parse parameters
+          params = [float(p) for p in params]
+          params[0] = int(params[0])
             
-        # get indices of error names
-        err_idx = [self._names.index(n) for n in err_names]
+          # parse qoi values
+          qois = [float(q) for q in qois]
+        
+          all_sims.append(params+qois)
+        
+      if file_type == 'sim_results':
+          self.param_names = list(param_names)
+          self.qoi_names   = list(qoi_names)
+          self.all_names   = list(all_names)
+          self.np_all_sims = np.array(all_sims)
+          self.__get_names_for_error_types()
+      
 
-        # select the sim_id column and err_names columns
-        results_err = self._results[:,[0] + err_idx]
-        results_abs_err = np.abs(results_err)
 
-        # make dataset 
-        n_row, n_col = results_abs_err.shape
-        self._pareto_dataset = []
-        for i_row in range(n_row):
-            self._pareto_dataset.append(Datapoint(i_row))
-            for i_col in range(n_col):
-                number = results_abs_err[i_row,i_col]
-                self._pareto_dataset[i_row].addNumber(-number)
- 
-    def calculate_pareto_set(self):
+  def read_simulation_results(self,
+                              fname_sims, 
+                              fname_pareto = None, 
+                              fname_cull = None):
+      """read simulations results from a file into a memory.
+      
+      Args:
+          fname_sims (str): the filename containing the simulation results from
+                          LAMMPS simulations
+          fname_pareto (str): the filename containing the pareto set results
+          fname_cull (str): the filename contain culled pareto set results
+      """
 
-        self._create_dataset_for_pareto_analysis(err_names=self._err_names)
-        bruteforce_algo(self._pareto_dataset)
-
-        # mark pareto set
-        pareto_set = []
-        pareto_set_ids = []
-        for s in self._pareto_dataset:
-            if s.paretoStatus == 1:
-                pareto_set_ids.append(s.id)
-                pareto_set.append(s.vec)
+      
+      self.fname_sims = fname_sims
+      self.__read_file(fname_sims, 'sim_results')
+      
+      if fname_pareto is not None:
+          self.fname_pareto = fname_pareto
+          self.__read_file(fname_in, 'pareto')
           
-        #pareto_set = -np.array(pareto_set)
-        self._pareto = self._results[pareto_set_ids,:]
-
-    def calculate_parameter_estimates(self,param_list):
-        params = copy.deepcopy(param_list)
-        self.param_estimates = {}
-        for param in params:
-            self.param_estimates[param] = {}
-            self.param_estimates[param]['all'] = {}
-            self.param_estimates[param]['pareto'] = {}
-            self.param_estimates[param]['pareto_cull'] = {}
-
-    def calculate_qoi_estimates(self,qoi_keys):
-        qois = copy.deepcopy(qoi_keys)
-        set_types = ['all','pareto','pareto_cull']
-        self.qoi_estimates = {}
-        for qoi in qois:
-            self.qoi_estimates[qoi] = {}
-            for set_type in set_types:
-                #TODO
-                mean = 0
-                std  = 1
-                self.qoi_estimates[qoi][set_type] = {}
-                self.qoi_estimates[qoi][set_type]['mean'] = mean
-                self.qoi_estimates[qoi][set_type]['std'] = std
+      if fname_cull is not None:
+          self.fname_cull = fname_cull
+          self.__read_file(fname_in, 'cull')
           
-    #--------------------------------------------------------------------------
-    # methods for calculating the culled pareto set
-    #--------------------------------------------------------------------------
-    def calculate_culled_set(self,cull_type="percentile",pct=80.):
-        if cull_type == "percentile":
-            self._calculate_culled_set_by_percentile(pct)
-        elif cull_type == "pct_error":
-            self._calculate_culled_set_by_percent_error(pct)
-        else:
-            raise RuntimeError("unknown cull_type")
+  def set_qoi_type(self,qoi_type):
+      self.qoi_type = qoi_type
+      self.qois = []
+      if qoi_type == 'abserr':
+          self.qois = self.names_abserr
+      elif qoi_type == "nabserr":
+          self.qois = self.names_nabserr
+      elif qoi_type == "sqerr":
+          self.qois = self.names_sqerr
+      elif qoi_type == "nsqerr":
+          self.qois = self.names_nsqerr
+      else:
+          raise ValueError("unknown_qoi_type")
+  
+  def __create_dataset_for_pareto_analysis(self, qoi_keys=""):
+      """
+      qoi_keys      If not set, will use all qois
+      """
 
-    def _calculate_culled_set_by_percentile(self,pct_kept=80.):
+      # Pareto set for all qois
+      if qoi_keys == "":
+          self.qoi_keys = copy.deepcopy(self.qois)
+      else:
+          self.qoi_keys = copy.deepcopy(qoi_keys)
+          for i in range(len(self.qoi_keys)):
+              if self.qoi_type == 'abserr':
+                  self.qoi_keys[i] = "{}_abserr".format(self.qoi_keys[i])
+              elif self.qoi_type == 'nabserr':
+                  self.qoi_keys[i] = "{}_nabserr".format(self.qoi_keys[i])
+              elif self.qoi_type == 'sqerr':
+                  self.qoi_keys[i] = "{}_sqerr".format(self.qoi_keys[i])
+              elif self.qoi_type == 'nsqerr':
+                  self.qoi_keys[i] = "{}_nsqerr".format(self.qoi_keys[i])
+              else:
+                  raise ValueError("unknown_qoi_type")
+                  
+      # check to see if each key exists
+      for qoi_key in self.qoi_keys:
+          if not qoi_key in self.qois:
+              errmsg = "qoi_key, {}, does not exist"
+              errmsg = errmsg.format(qoi_key)
+              raise ValueError(errmsg)
+              
+      # make dataset 
+      self.pareto_dataset = []
+      n_row, n_col = self.np_all_sims.shape
+      for i_row in range(n_row):
+          self.pareto_dataset.append(Datapoint(i_row))
+          for qoi in self.qoi_keys:
+              i_col = self.all_names.index(qoi)
+              self.pareto_dataset[i_row].addNumber(-self.np_all_sims[i_row,i_col])
+      #for n, sim in enumerate(self.all_sims):
+      #    self.pareto_dataset.append(pyflamestk.pareto.Datapoint(n))
+      #    for qoi in self.qoi_keys:
+      #        idx = self.all_names.index(qoi)
+      #        self.pareto_dataset[n].addNumber(-sim[idx])
+         
+  def calculate_pareto_set(self,qoi_keys):
+      my_qoi_keys = copy.deepcopy(qoi_keys)
+
+      self.__create_dataset_for_pareto_analysis(qoi_keys=my_qoi_keys)
+      print("calculating pareto set...")
+      pyflamestk.pareto.bruteforce_algo(self.pareto_dataset)
+    
+      # mark pareto set
+      self.pareto_set_ids = []
+      for s in self.pareto_dataset:
+        if s.paretoStatus == 1:
+          self.pareto_set_ids.append(s.id)
+          self.pareto_set.append(s.vec)
+          
+      self.pareto_set = -np.array(self.pareto_set)
+      self.np_pareto_set = self.np_all_sims[self.pareto_set_ids]
+      self.pareto_mean = np.mean(self.np_pareto_set)
+      self.pareto_cov  = np.cov(self.np_pareto_set)
+
+  def calculate_parameter_estimates(self,param_list):
+      params = copy.deepcopy(param_list)
+      self.param_estimates = {}
+      for param in params:
+          self.param_estimates[param] = {}
+          self.param_estimates[param]['all'] = {}
+          self.param_estimates[param]['pareto'] = {}
+          self.param_estimates[param]['pareto_cull'] = {}
+  
+  def calculate_qoi_estimates(self,qoi_keys):
+      qois = copy.deepcopy(qoi_keys)
+      set_types = ['all','pareto','pareto_cull']
+      self.qoi_estimates = {}
+      for qoi in qois:
+          self.qoi_estimates[qoi] = {}
+          for set_type in set_types:
+              #TODO
+              mean = 0
+              std  = 1
+              self.qoi_estimates[qoi][set_type] = {}
+              self.qoi_estimates[qoi][set_type]['mean'] = mean
+              self.qoi_estimates[qoi][set_type]['std'] = std
+          
+  def cull_by_percentile(self,pct_kept=10.):
         """
+        
         Arguments:
-        pct_kept (float, 10.0) - number between 1 and 100 indicating the 
-        pct of simulations within the Pareto set which should be kept
+        pct_kept (float, 10.0) - number between 1 and 100 indicating the pct of simulations
+            within the Pareto set which should be kept
                         
         Returns:
         
@@ -516,9 +446,8 @@ class SimulationResults:
         same as the array in "self.all_names".
         """
 
-        # TODO:
-        # A Newton-Ralphson method to get more accurate performance requirements
-        #to prevent over culling of the Pareto set.
+        # TODO: A Newton-Ralphson method to get more accurate performance requirements
+        #       to prevent over culling of the Pareto set.
        
         if not(0 <= pct_kept <= 100.):
             errmsg = "pct_kept must be between 1 and 100, the value {} was passed."
@@ -526,12 +455,13 @@ class SimulationResults:
             raise ValueError(errmsg)
         else:
             self.pct_kept = pct_kept
-              
-        err_keys = self._err_names
-        self._perf_req = {}
-        for err_key in err_keys:
-            self._perf_req[err_key] = 0.
-        n_sims, n_qoi = self._pareto.shape        
+            
+            
+        qoi_keys = self.qoi_keys
+        self.performance_requirements = {}
+        for qoi_key in qoi_keys:
+            self.performance_requirements[qoi_key] = 0.
+        n_sims, n_qoi = self.np_pareto_set.shape        
     
         # intialize variables
         pctl_threshold = 100        # searching for 100% within the Pareto set
@@ -540,177 +470,265 @@ class SimulationResults:
         
         while not is_culled:
             rows_to_delete = []
-            pctl_threshold -= 0.1
+            pctl_threshold -= 1
             # calculate percentile cutoffs
-            for err_key in self._perf_req.keys():
+            for qoi_key in self.performance_requirements.keys():
                 if pctl_threshold < 0:
-                    errmsg = "While searching for the pctl_threshold, the \
-                              percentile error dropped below zero resulting \
-                              in an error."
+                    errmsg = "While searching for the pctl_threshold, the percentile error dropped below zero resulting in an error."
                     raise ValueError(errmsg)
+                    # TODO: remove
+                    # print(msg_out)
+                    # print("percentile must be greater than 0")
+                    # is_culled = True
                 else:
-                    qoi_data = self.get_data(err_key, 'pareto','abserror')
-                    cutoff = np.percentile(qoi_data,pctl_threshold)
-                    self._perf_req[err_key] = cutoff
+                    qoi_data = self.get_data_by_name(qoi_key, 'pareto')
+                    #TODO: remove
+                    #qoi_id = self.all_names.index(qoi_key)
+                    # qoi_data = self.np_pareto_set[:,qoi_id]
+                    self.performance_requirements[qoi_key] = np.percentile(qoi_data, pctl_threshold)
 
             # cull the pareto set by the performance requirements
-            for err_key in self._perf_req.keys():        
-                pareto = np.copy(self.pareto)
+            for qoi_key in self.performance_requirements.keys():        
+                np_pareto_set_cull = np.copy(self.np_pareto_set)
                 for idx in range(n_sims):
-                    ps = pareto[idx,:]
-
-                    # determine if row needs to be deleted
+                    ps = np_pareto_set_cull[idx,:]
                     is_delete_row = False
-                    for qoi_name in self._perf_req.keys():
-                        qoi_idx = self._names.index(qoi_name)
-                        if ps[qoi_idx] > self._perf_req[qoi_name]:
+                    for qoi_name in self.performance_requirements.keys():
+                        qoi_idx = self.all_names.index(qoi_name)
+                        if ps[qoi_idx] > self.performance_requirements[qoi_name]:
                             is_delete_row = True 
-                            
-                    # add row for deletion if requirements met.
                     if is_delete_row:
                         rows_to_delete.append(idx)
             
             # check to see if the pareto set has been sufficiently culled
             n_culled = len(rows_to_delete)
-            pct_culled = float(n_culled)/float(n_sims)
+            pct_culled = float(n_culled/n_sims)
             if pct_kept/100. > 1 - pct_culled:
                 is_culled = True
-
-        self._culled = np.delete(self._pareto,
-                                 rows_to_delete,
-                                 axis=0)                
-        return self._culled.copy()
-            
-    def _calculate_culled_set_by_percent_error(self,pct_kept=80.):
-        """
-        Keeps members of the pareto set, which are (1+pct) over the
-        reference value
         
-        Arguments:
-            pct (float, 8.0) - number indicating the cutoff within which
-                members of the Pareto set should be kept.
-        """
-        if (pct_kept) <= 0:
-            errmsg = "pct_kept must be between 1 and 100, the value {} was passed."
-            errmsg = errmsg.format(pct_kept)
-            raise ValueError(errmsg)
+        # delete rows not in the pareto set
+        self.np_pareto_set_cull = np.copy(self.np_pareto_set)
+        self.np_pareto_set_cull = np.delete(np_pareto_set_cull,rows_to_delete,axis=0)
+
+        # TODO: this should be moved to a reporting section
+        msg_out = ""                # intialize output string
+        msg_out += "n_pareto_set        = {}\n".format(n_sims)
+        msg_out += "n_rows_culled       = {}\n".format(n_culled)
+        msg_out += "n_culled_pareto_set = {}\n".format(n_sims - n_culled)
+        msg_out += "performance constraints:\n"
+        for qoi_key in self.performance_requirements.keys():
+            msg_out += "\t {} < {:0.4f}\n".format(qoi_key,self.performance_requirements[qoi_key])    
+        print(msg_out)
         
-        # calculate performance constraints.
-        pct_kept = float(pct_kept)             # force casting into float
-        pct_kept = pct_kept/100.
-        self._perf_req = {k:pct_kept*v for k,v in self._qoi_ref.items()}
+        return self.np_pareto_set_cull.copy()
+
+  def add_performance_constraint(self,metric_name,metric_value):
+    self.performance_requirements[metric_name] = metric_value
+
+  def apply_performance_constraints(self):
+    # start with the full pareto set and then remove elements which do 
+    # not meat the performane criteria
+    n_sims, n_qoi = self.np_pareto_set.shape
+    self.np_pareto_set_cull = np.copy(self.np_pareto_set)
+
+    #determine which rows to delete
+    rows_to_delete = []
+    for idx in range(n_sims):
+      ps = self.np_pareto_set_cull[idx,:]
+      is_delete_row = False
+      for qoi_name in self.performance_requirements.keys():
+        qoi_idx = self.all_names.index(qoi_name)
+        if ps[qoi_idx] > self.performance_requirements[qoi_name]:
+          is_delete_row = True 
+      if is_delete_row:
+        rows_to_delete.append(idx)
         
-        self.apply_performance_constraints()
+    # remove rows which do not meet performance criteria
+    self.np_pareto_set_cull = np.delete(self.np_pareto_set_cull,
+                                        rows_to_delete,
+                                        axis=0)
+    self.pareto_cull_mean = np.mean(self.np_pareto_set_cull)
+    self.pareto_cull_cov  = np.cov(self.np_pareto_set_cull)
 
-    def _calculate_culled_set_by_performance_requirements(self, perf_req=None):
-        if perf_req is None:
-            perf_req = self._perf_req
-        else:
-            assert type(perf_req), dict
+  def create_all_histograms(self):
+    for name in self.param_names:
+      self.create_histogram(name)
 
-        self.apply_performance_constraints()
-
-    def add_performance_constraint(self,metric_name,metric_value):
-        assert type(metric_name),str
-        assert type(metric_value),float
-
-        if self._perf_req is None:
-            self._perf_req = {}
-        self._perf_req[metric_name] = metric_value
-
-    def apply_performance_constraints(self):
-        # start with the full pareto set and then remove elements which do 
-        # not meat the performane criteria
-        n_sims, n_qoi = self._pareto.shape
-        self._culled = np.copy(self._pareto)
-
-        #determine which rows to delete
-        rows_to_delete = []
-        for idx in range(n_sims):
-            ps = self._culled[idx,:]
-            is_delete_row = False
-            for qoi_name in self._perf_req.keys():
-                err_name = qoi_name + ".err"
-                err_idx = self._names.index(err_name)
-                if np.abs(ps[err_idx]) > self._perf_req[qoi_name]:
-                    is_delete_row = True 
-            if is_delete_row:
-                rows_to_delete.append(idx)
-        
-        # remove rows which do not meet performance criteria
-        self._culled = np.delete(self._culled,
-                                 rows_to_delete,
-                                 axis=0)
-
-    def get_data(self, name, ds_type, err_type = 'abserr'):
-        """
-        Arguments:
-       
-        name (str) - string of parameter or quantity of interest
-        ds_type (str) - string of which dataset we are taking the data from.
+  def create_histogram(self,name):
+    plt.figure()
+    x_idx = self.all_names.index(name)
+    plt.hist(self.np_all_sims[:,x_idx])
+    plt.show()
+    
+  def get_data_by_name(self,name,ds_type):
+      """
+      Arguments:
+      
+      name (str) - string of parameter or quantity of interest
+      ds_type (str) - string of which dataset we are taking the data from.
           The ds_types which are supported are: all, pareto, pareto_culled
           
-        Returns:
+      Returns:
       
-        a numpy array of the data asked for
+      a numpy array of the data asked for
+          
+      """
+      
+      idx = self.all_names.index(name)
+      
+      if ds_type == 'all':
+          return self.np_all_sims[:,idx]
+      elif ds_type == 'pareto':
+          return self.np_pareto_set[:,idx]
+      elif ds_type == 'pareto_cull':
+          return self.np_pareto_set_cull[:,idx]
+      else:
+          errmsg = "ds_type must be either all, pareto, or pareto_cull"
+          raise ValueError(errmsg)
+ 
+  def create_2d_pareto_plot(self,
+                            qoi_name_1,
+                            qoi_name_2,
+                            error_type = "",
+                            show_dominated = True,
+                            show_pareto = True, 
+                            show_culled = True,
+                            show_2d_pareto_curve = True,
+                            show_2d_culled_curve = True):   
         """
-        idx  = self._names.index(name)
+        Arguments:
+        
+        qoi_name_1 (string) - the name of the first quantity of interest to be
+            plotted on the x-axis
+        qoi_name_2 (string) - the name of the second quantity of interest to be
+            plotted on the y-axis
+        error_type (string: "" ) - not implemented yet
+        show_dominated (bool, True) - shows dominated points when set to true
+        show_pareto (bool,True) - shows Pareto points when set to true.
+        show_culled (bool,True) - shows the remaining Pareto points when the 
+            Pareto set is culled by by performance requirements.
+        show_2d_pareto_curve (bool,True) - shows a 2d slice of the Pareto curve
+            when set to True.
+        show_2d_pareto_cuve (bool,True) - shows a 2d slice of the culled Pareto
+            curve when set to false.
+            
+        Returns:
+        
+        Nothing
+            
+        Notes:
+        
+        When the dominated points are plotted, it actually plots all the points
+        in the dataset.  However, these points are then plotted over by the
+        Pareto points.
+        """
+        
+        
+        x_label = qoi_name_1
+        y_label = qoi_name_2
+                                   
+        x_data_all = self.get_data_by_name(x_label, 'all')
+        y_data_all = self.get_data_by_name(y_label, 'all')
+        
+        if show_pareto == True:
+            x_data_pareto = self.get_data_by_name(x_label, 'pareto')
+            y_data_pareto = self.get_data_by_name(y_label, 'pareto')
 
-        # get data by dataset
-        data = None # initialize
-        if ds_type == 'results':
-            data = self._results[:,idx]
-        elif ds_type == 'pareto':
-            data = self._pareto[:,idx]
-        elif ds_type == 'culled':
-            data = self._culled[:,idx]
+            if show_2d_pareto_curve == True:
+                pareto_2d = pyflamestk.pareto.pareto_frontier_2d(x_data_all,
+                                                                 y_data_all,
+                                                                 maxX = False, maxY= False) 
+            
+        if show_culled == True:
+            x_data_cull = self.get_data_by_name(x_label, 'pareto_cull')
+            y_data_cull = self.get_data_by_name(y_label, 'pareto_cull')
 
-        if self._types[idx] == 'err':
-            # transform errors if necessary
-            if err_type == 'err':
-                # no transformation required
-                data = self._results[:,idx]
-            elif err_type == 'abserr':
-                # transform for absolute errors
-                data = np.abs(self._results[:,idx])
-        else:
-            # tranformation not necessary
-            data = self._results[:,idx]
+            if show_2d_pareto_curve == True:
+                cull_2d = pyflamestk.pareto.pareto_frontier_2d(x_data_cull,
+                                                               y_data_cull,
+                                                               maxX = False, maxY= False)         
+        # plot results
+        plt.figure()
+    
+        if show_dominated == True:
+            c = 'b'
+            plt.scatter(x_data_all, y_data_all, color = c)
+            
+        if show_pareto == True:
+            c = 'y'
+            plt.scatter(x_data_pareto,y_data_pareto, color=c)
+            if show_2d_pareto_curve == True:
+                plt.plot(pareto_2d[0],pareto_2d[1],color=c)
 
-        return copy.deepcopy(data)
-   
-    def create_all_pareto_plots(self,qoi_list):
-        for i, qoi_name_i in enumerate(qoi_list):         
-            for j, qoi_name_j in enumerate(qoi_list):
-                if i < j and i != j:
-                    print("{} {}".format(qoi_name_i,qoi_name_j))
-                    x_label = qoi_name_i
-                    y_label = qoi_name_j
-                    x_idx = self.all_names.index(x_label)
-                    y_idx = self.all_names.index(y_label)
-                    pareto_front = pareto_frontier_2d(self.np_all_sims[:,x_idx],
-                                          self.np_all_sims[:,y_idx],
-                                          maxX = False, maxY= False)
-                    fig, ax = plt.subplots()
-                    ax.scatter(self.np_all_sims[:,x_idx],
-                           self.np_all_sims[:,y_idx],
-                           label='dominated')
-                    ax.scatter(self.pareto_set[:,self.qois.index(x_label)],
-                           self.pareto_set[:,self.qois.index(y_label)],
-                           label = 'pareto', color='y',)
-                    ax.plot(pareto_front[0],
-                            pareto_front[1],
-                            color='r',
-                            linewidth=2)
-                    legend = ax.legend(loc="upper right")
-                    plt.axis([min(pareto_front[0]),
-                              max(pareto_front[0]),
-                              min(pareto_front[1]),
-                              max(pareto_front[1])])
-                    plt.xlabel(x_label)
-                    plt.ylabel(y_label)
-                    plt.show()
+        if show_culled == True:
+            c = 'g'
+            plt.scatter(x_data_cull,  y_data_cull, color = c)
+            if show_2d_pareto_curve == True:
+                plt.plot(cull_2d[0],cull_2d[1],color=c)
+
+        # determine axis
+        xmin = min(pareto_2d[0])
+        xmax = max(pareto_2d[0])
+        ymin = min(pareto_2d[1])
+        ymax = max(pareto_2d[1])
+        plt.axis([xmin,xmax,ymin,ymax])
+        
+        # add labels
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        
+        # display graph
+        plt.show()
+  
+  def create_all_pareto_plots(self,qoi_list):
+    for i, qoi_name_i in enumerate(qoi_list):         
+      for j, qoi_name_j in enumerate(qoi_list):
+        if i < j and i != j:
+          print("{} {}".format(qoi_name_i,qoi_name_j))
+          x_label = qoi_name_i
+          y_label = qoi_name_j
+          x_idx   = self.all_names.index(x_label)
+          y_idx   = self.all_names.index(y_label)
+          pareto_front = pareto_frontier_2d(self.np_all_sims[:,x_idx],
+                                            self.np_all_sims[:,y_idx],
+                                            maxX = False, maxY= False)
+          fig, ax = plt.subplots()
+          ax.scatter(self.np_all_sims[:,x_idx],
+                     self.np_all_sims[:,y_idx],
+                     label='dominated')
+          ax.scatter(self.pareto_set[:,self.qois.index(x_label)],
+                     self.pareto_set[:,self.qois.index(y_label)],label = 'pareto', color='y',)
+          ax.plot(pareto_front[0],
+                  pareto_front[1],
+                  color='r',
+                  linewidth=2)
+          legend = ax.legend(loc="upper right")
+          plt.axis([min(pareto_front[0]),
+                    max(pareto_front[0]),
+                    min(pareto_front[1]),
+                    max(pareto_front[1])])
+          plt.xlabel(x_label)
+          plt.ylabel(y_label)
+          plt.show()
+
       
+  def __get_names_for_error_types(self):    
+    # get names for different types
+    self.names_abserr = []  # initialize, array for q_est - q
+    self.names_nabserr = [] # initialize, array for (q_est - q)/q
+    self.names_sqerr  = []  # initialize, array for q_est - q
+    self.names_nsqerr = []  # initialize, array for (q_est -q)/q
+    
+    for name in self.all_names:
+      if name.endswith("_abserr"):
+        self.names_abserr.append(name)
+      if name.endswith("_nabserr"):
+        self.names_nabserr.append(name)
+      if name.endswith("_sqerr"):
+        self.names_sqerr.append(name)
+      if name.endswith("_nsqerr"):
+        self.names_nsqerr.append(name)
+    
 class ParetoSet:
   def __init__(self):
     pass  

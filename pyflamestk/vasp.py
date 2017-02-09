@@ -3,6 +3,18 @@ import copy
 import pyflamestk.base as base
 import numpy as np
 
+class Incar():
+    def __init__(self, fname="INCAR"):
+        self._fnamename = fname
+
+    @property
+    def filename(self):
+        return self._filename
+
+    @filename.setter
+    def filename(self, fn):
+        self._filename = fn
+
 class Outcar():
     def __init__(self, fname="OUTCAR"):
         self._filename = fname
@@ -163,7 +175,7 @@ class Poscar(base.Structure):
     @filename_out.setter
     def filename_out(self,fname_out):
         self._fname_out = fname_out
-        
+    
     def read_file(self, fname_in=None):
         if fname_in is not None:
             self._fname_in = fname_in
@@ -180,7 +192,7 @@ class Poscar(base.Structure):
             h_row = np.array([float(val) for val in h_row])
             h_matrix[i,:] = h_row
         self.h_matrix = h_matrix
-            
+
         # read symbols and atoms per symbol
         symbols        = f.readline().strip().split()
         n_symbols_list = [int(i) for i in f.readline().strip().split()]
