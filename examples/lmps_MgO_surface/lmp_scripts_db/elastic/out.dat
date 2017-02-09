@@ -1,0 +1,6 @@
+LAMMPS (10 Feb 2015)
+Reading data file ...
+  triclinic box = (0 0 0) to (14.0321 14.0321 14.0321) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+ERROR: Incorrect atom format in data file (../atom.cpp:744)

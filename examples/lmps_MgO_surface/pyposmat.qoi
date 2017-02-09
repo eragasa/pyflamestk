@@ -1,0 +1,20 @@
+# quantities of interest
+qoi_list = MgO_NaCl_latt, MgO_NaCl_c11, MgO_NaCl_c12, MgO_NaCl_c44, MgO_NaCl_B, MgO_NaCl_G
+
+# qoi = <qoi_name, variable, structure_type>
+# define_qoi = MgO_NaCl_press, sp_pressure, MgO_NaCl
+# define_qoi = MgO_NaCl_ecoh,  sp_ecoh,     MgO_NaCl 
+define_qoi = MgO_NaCl_latt, min_latt_xx,    MgO_NaCl
+define_qoi = MgO_NaCl_c11,  elas_c11,       MgO_NaCl
+define_qoi = MgO_NaCl_c12,  elas_c12,       MgO_NaCl
+define_qoi = MgO_NaCl_c44,  elas_c44,       MgO_NaCl
+define_qoi = MgO_NaCl_B,    elas_bulk,      MgO_NaCl
+define_qoi = MgO_NaCl_G,    elas_shear,     MgO_NaCl
+# qoi_targets =  <qoi-name>,      <target>,  <weight>, <norm_factor>
+qoi_target =      MgO_NaCl_latt,   4.1212,    100.0,    4.1212
+qoi_target =      MgO_NaCl_c11,    306.7,     100.0,    306.7
+qoi_target =      MgO_NaCl_c12,    93.7,      100.0,    93.7
+qoi_target =      MgO_NaCl_c44,    157.6,     100.0,    157.6
+qoi_target =      MgO_NaCl_B,      226.0,     100.0,    226.0
+qoi_target =      MgO_NaCl_G,       92.0,     100.0,    92.0
+

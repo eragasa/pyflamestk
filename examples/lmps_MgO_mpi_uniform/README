@@ -1,0 +1,19 @@
+Requirements:
+
+numpy
+
+
+The following variables are set in the submission script
+1.    PYTHONPATH must include the pyflamestk module
+2.    LAMMPS_BIN must be set to the LAMMPS binary.  Since pyflamestk uses MPI 
+for parallization, at the current time LAMMPS cannot.
+
+to run this simulation, run
+
+NOTES FOR NERSC:
+These scripts were developed on edison
+lbl_concurrent_lammps.sl
+    sbatch -n 1 -p debug --time=30 lbl_concurrent_lammps.sl
+run_lbl.sh
+
+

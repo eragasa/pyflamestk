@@ -1,0 +1,799 @@
+LAMMPS (10 Feb 2015)
+Reading data file ...
+  triclinic box = (0 0 0) to (5.3376 5.3376 5.3376) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+PPPM initialization ...
+  G vector (1/distance) = 0.349034
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68713e-05
+  estimated relative force accuracy = 4.64395e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.81982 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       0            0   -155.36536   -41.063319   -41.063319   -41.063319   -41.063319 -4.5677258e-11 -9.0037436e-11 1.1559483e-10       5.3376       5.3376       5.3376    152.06808 
+       1            0   -155.36536 -0.054527613 -0.054527613 -0.054527613 -0.054527613 -5.871503e-11 -1.7844197e-10 4.5656512e-11    5.3375571    5.3375571    5.3375571    152.06442 
+       2            0   -155.36536 -0.051068563 -0.051068563 -0.051068563 -0.051068563 -5.9679661e-11 2.500169e-10 2.6898878e-10     5.337557     5.337557     5.337557    152.06441 
+       3            0   -155.36536 -0.051068563 -0.051068563 -0.051068563 -0.051068563 -5.9679661e-11 2.500169e-10 2.6898878e-10     5.337557     5.337557     5.337557    152.06441 
+Loop time of 0.0132699 on 1 procs for 3 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -155.365355133     -155.365358432     -155.365358432
+  Force two-norm initial, final = 0.0067506 8.39528e-06
+  Force max component initial, final = 0.00389746 4.84702e-06
+  Final line search alpha, max atom move = 0.5 2.42351e-06
+  Iterations, force evaluations = 3 7
+
+Pair  time (%) = 0.000842094 (6.3459)
+Kspce time (%) = 0.00107598 (8.10845)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 8.86917e-05 (0.668368)
+Outpt time (%) = 3.31402e-05 (0.249739)
+Other time (%) = 0.01123 (84.6275)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+System init for write_restart ...
+PPPM initialization ...
+  G vector (1/distance) = 0.349035
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68699e-05
+  estimated relative force accuracy = 4.64385e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33757 5.33758 5.33758) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.345907
+  grid = 8 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 8.46799e-05
+  estimated relative force accuracy = 5.8807e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3840 648
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.79089 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36534    2.3764895    1.3569441    2.8862623    2.8862623 2.4366077e-11 -5.0605297e-11 -4.6310546e-11    5.3375517     5.337557     5.337557    152.06426 
+       4            0   -155.36534    2.3764895    1.3569441    2.8862623    2.8862623 6.4283759e-11 -5.0759227e-11 -3.6963961e-11    5.3375517     5.337557     5.337557    152.06426 
+Loop time of 0.000710011 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+         -155.36534321      -155.36534321      -155.36534321
+  Force two-norm initial, final = 1.12164e-14 8.40184e-15
+  Force max component initial, final = 7.21645e-15 5.44009e-15
+  Final line search alpha, max atom move = 1 5.44009e-15
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000258923 (36.4674)
+Kspce time (%) = 0.000350952 (49.4291)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.40939e-05 (4.80188)
+Outpt time (%) = 0 (0)
+Other time (%) = 6.60419e-05 (9.30154)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.349035
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68699e-05
+  estimated relative force accuracy = 4.64386e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.8109 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36536   -1.7218182  -0.71247677   -2.2264889   -2.2264889 -9.31326e-11 -5.3839425e-11 -7.5948847e-11    5.3375624     5.337557     5.337557    152.06456 
+       4            0   -155.36536   -1.7218182  -0.71247677   -2.2264889   -2.2264889 -7.4274401e-11 -1.2042828e-10 -6.6385237e-11    5.3375624     5.337557     5.337557    152.06456 
+Loop time of 0.000678062 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+        -155.365356505     -155.365356505     -155.365356505
+  Force two-norm initial, final = 1.54352e-14 1.85756e-14
+  Force max component initial, final = 6.51562e-15 9.76996e-15
+  Final line search alpha, max atom move = 1 9.76996e-15
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000226974 (33.474)
+Kspce time (%) = 0.000369072 (54.4304)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 2.81334e-05 (4.14909)
+Outpt time (%) = 0 (0)
+Other time (%) = 5.38826e-05 (7.94655)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33757 5.33758) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.345907
+  grid = 9 8 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 8.46799e-05
+  estimated relative force accuracy = 5.8807e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3840 648
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.79089 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36534    2.3764895    2.8862623    1.3569441    2.8862623 1.0208976e-11 -6.7715619e-11 3.9882627e-11     5.337557    5.3375517     5.337557    152.06426 
+       4            0   -155.36534    2.3764895    2.8862623    1.3569441    2.8862623 2.0748159e-11 -1.0514765e-10 3.9868919e-11     5.337557    5.3375517     5.337557    152.06426 
+Loop time of 0.000672102 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+         -155.36534321      -155.36534321      -155.36534321
+  Force two-norm initial, final = 1.0228e-14 7.47609e-15
+  Force max component initial, final = 5.32907e-15 3.55271e-15
+  Final line search alpha, max atom move = 1 3.55271e-15
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000257969 (38.3824)
+Kspce time (%) = 0.000357151 (53.1394)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.12328e-05 (4.64704)
+Outpt time (%) = 0 (0)
+Other time (%) = 2.57492e-05 (3.83115)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.349035
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68699e-05
+  estimated relative force accuracy = 4.64386e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.8109 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36536   -1.7218182   -2.2264889  -0.71247677   -2.2264889 -1.0008055e-10 -6.779716e-11 -1.1722732e-10     5.337557    5.3375624     5.337557    152.06456 
+       4            0   -155.36536   -1.7218182   -2.2264889  -0.71247677   -2.2264889 -1.3969837e-10 -8.6366921e-11 -1.7324275e-10     5.337557    5.3375624     5.337557    152.06456 
+Loop time of 0.00077796 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+        -155.365356505     -155.365356505     -155.365356505
+  Force two-norm initial, final = 1.40869e-14 1.72518e-14
+  Force max component initial, final = 6.48613e-15 9.76996e-15
+  Final line search alpha, max atom move = 1 9.76996e-15
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000256777 (33.0064)
+Kspce time (%) = 0.000426292 (54.7962)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.19481e-05 (4.10665)
+Outpt time (%) = 0 (0)
+Other time (%) = 6.29425e-05 (8.09071)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33757) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.345907
+  grid = 9 9 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 8.46799e-05
+  estimated relative force accuracy = 5.8807e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3840 648
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.79382 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36534    2.3764895    2.8862623    2.8862623    1.3569441 -9.133111e-11 -1.8481752e-10 -6.1477328e-11     5.337557     5.337557    5.3375517    152.06426 
+       4            0   -155.36534    2.3764895    2.8862623    2.8862623    1.3569441 -1.4857694e-10 -2.2692627e-10 -4.6288842e-11     5.337557     5.337557    5.3375517    152.06426 
+Loop time of 0.000762939 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+         -155.36534321      -155.36534321      -155.36534321
+  Force two-norm initial, final = 1.63324e-14 1.04317e-14
+  Force max component initial, final = 7.63278e-15 4.90753e-15
+  Final line search alpha, max atom move = 1 4.90753e-15
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000310898 (40.75)
+Kspce time (%) = 0.000387192 (50.75)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.98159e-05 (5.21875)
+Outpt time (%) = 0 (0)
+Other time (%) = 2.5034e-05 (3.28125)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.349035
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68699e-05
+  estimated relative force accuracy = 4.64386e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.8109 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36536   -1.7218182   -2.2264889   -2.2264889  -0.71247677 -7.8189818e-12 -1.8333983e-10 -2.0191873e-11     5.337557     5.337557    5.3375624    152.06456 
+       4            0   -155.36536   -1.7218182   -2.2264889   -2.2264889  -0.71247677 2.5224134e-11 -2.0852141e-11 8.0283142e-12     5.337557     5.337557    5.3375624    152.06456 
+Loop time of 0.000785112 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+        -155.365356505     -155.365356505     -155.365356505
+  Force two-norm initial, final = 1.77737e-14 2.5696e-14
+  Force max component initial, final = 1.04517e-14 1.46411e-14
+  Final line search alpha, max atom move = 1 1.46411e-14
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000250101 (31.8555)
+Kspce time (%) = 0.000440836 (56.1494)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.52859e-05 (4.49438)
+Outpt time (%) = 0 (0)
+Other time (%) = 5.88894e-05 (7.50076)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 -5.33756e-06)
+PPPM initialization ...
+  G vector (1/distance) = 0.349035
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68698e-05
+  estimated relative force accuracy = 4.64385e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.8109 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36536 -0.019939527 -0.024993385 -0.017414713 -0.017410483 1.4046423e-12 -2.9096114e-10    2.2064859     5.337557     5.337557     5.337557    152.06441 
+       4            0   -155.36536 -0.019939526 -0.024993384 -0.017414713 -0.017410483 -8.7420882e-11 -1.9621169e-10    2.2064859     5.337557     5.337557     5.337557    152.06441 
+Loop time of 0.000821114 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+        -155.365356757     -155.365356757     -155.365356757
+  Force two-norm initial, final = 1.32361e-14 1.80766e-14
+  Force max component initial, final = 5.77316e-15 9.6919e-15
+  Final line search alpha, max atom move = 1 9.6919e-15
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000283003 (34.4657)
+Kspce time (%) = 0.000471115 (57.3751)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.91006e-05 (4.7619)
+Outpt time (%) = 0 (0)
+Other time (%) = 2.7895e-05 (3.39721)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 5.33756e-06)
+PPPM initialization ...
+  G vector (1/distance) = 0.349035
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68699e-05
+  estimated relative force accuracy = 4.64386e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.8109 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36536 -0.019930457 -0.024984317 -0.017405641 -0.017401412 3.2510821e-12 -3.5848392e-10   -2.2064859     5.337557     5.337557     5.337557    152.06441 
+       4            0   -155.36536 -0.019930456 -0.024984316 -0.017405641 -0.017401412 1.9040927e-10 -2.6744491e-10   -2.2064859     5.337557     5.337557     5.337557    152.06441 
+Loop time of 0.000778198 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+        -155.365356757     -155.365356757     -155.365356757
+  Force two-norm initial, final = 2.60584e-14 1.69558e-14
+  Force max component initial, final = 1.78434e-14 8.96158e-15
+  Final line search alpha, max atom move = 1 8.96158e-15
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.00025773 (33.1189)
+Kspce time (%) = 0.000431061 (55.3922)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.86238e-05 (4.96324)
+Outpt time (%) = 0 (0)
+Other time (%) = 5.07832e-05 (6.52574)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 -5.33756e-06 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.349035
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68698e-05
+  estimated relative force accuracy = 4.64385e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.8109 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36536 -0.019939527 -0.017414713 -0.024993385 -0.017410483 -2.1519656e-10    2.2064859 -1.9972536e-10     5.337557     5.337557     5.337557    152.06441 
+       4            0   -155.36536 -0.019939527 -0.017414713 -0.024993384 -0.017410483 -1.3550007e-10    2.2064859 -1.3300279e-10     5.337557     5.337557     5.337557    152.06441 
+Loop time of 0.000699997 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+        -155.365356757     -155.365356757     -155.365356757
+  Force two-norm initial, final = 1.47136e-14 1.74579e-14
+  Force max component initial, final = 6.75675e-15 8.43769e-15
+  Final line search alpha, max atom move = 1 8.43769e-15
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000230074 (32.8678)
+Kspce time (%) = 0.000409365 (58.4809)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.76701e-05 (5.38147)
+Outpt time (%) = 0 (0)
+Other time (%) = 2.28882e-05 (3.26975)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 5.33756e-06 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.349035
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68699e-05
+  estimated relative force accuracy = 4.64386e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.8109 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36536 -0.019930456 -0.017405641 -0.024984316 -0.017401412 -3.0388651e-11   -2.2064859 -6.5381275e-11     5.337557     5.337557     5.337557    152.06441 
+       4            0   -155.36536 -0.019930456 -0.017405641 -0.024984316 -0.017401412 3.189189e-11   -2.2064859 1.6402689e-11     5.337557     5.337557     5.337557    152.06441 
+Loop time of 0.000755072 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+        -155.365356757     -155.365356757     -155.365356757
+  Force two-norm initial, final = 2.00821e-14 2.31302e-14
+  Force max component initial, final = 1.21847e-14 1.35274e-14
+  Final line search alpha, max atom move = 1 1.35274e-14
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000239849 (31.7651)
+Kspce time (%) = 0.000424862 (56.2678)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.38554e-05 (4.48374)
+Outpt time (%) = 0 (0)
+Other time (%) = 5.65052e-05 (7.48342)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (-5.33756e-06 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.349035
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68698e-05
+  estimated relative force accuracy = 4.64385e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.8109 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36536 -0.019939527 -0.017414713 -0.017410483 -0.024993385    2.2064859 -2.0584842e-10 -2.5147917e-10     5.337557     5.337557     5.337557    152.06441 
+       4            0   -155.36536 -0.019939527 -0.017414713 -0.017410483 -0.024993385    2.2064859 -1.7309656e-10 -2.4900573e-10     5.337557     5.337557     5.337557    152.06441 
+Loop time of 0.000849009 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+        -155.365356757     -155.365356757     -155.365356757
+  Force two-norm initial, final = 1.03744e-14 9.15286e-15
+  Force max component initial, final = 6.8695e-15 6.8695e-15
+  Final line search alpha, max atom move = 1 6.8695e-15
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000263691 (31.0587)
+Kspce time (%) = 0.00050807 (59.8427)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 4.22001e-05 (4.97051)
+Outpt time (%) = 0 (0)
+Other time (%) = 3.50475e-05 (4.12805)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (2.14827e-05 2.14827e-05 2.14827e-05) to (5.33758 5.33758 5.33758) with tilt (5.33756e-06 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.349035
+  grid = 9 9 9
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.68699e-05
+  estimated relative force accuracy = 4.64386e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 4096 729
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.8109 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       3            0   -155.36536 -0.019930457 -0.017405642 -0.017401412 -0.024984316   -2.2064859 -1.6638192e-10 -2.3325429e-10     5.337557     5.337557     5.337557    152.06441 
+       4            0   -155.36536 -0.019930456 -0.017405641 -0.017401411 -0.024984316   -2.2064859 -1.0971688e-11 -1.1034765e-10     5.337557     5.337557     5.337557    152.06441 
+Loop time of 0.000758886 on 1 procs for 1 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+        -155.365356757     -155.365356757     -155.365356757
+  Force two-norm initial, final = 1.81885e-14 3.4739e-14
+  Force max component initial, final = 1.14075e-14 1.89831e-14
+  Final line search alpha, max atom move = 1 1.89831e-14
+  Iterations, force evaluations = 1 2
+
+Pair  time (%) = 0.000257015 (33.8674)
+Kspce time (%) = 0.000415087 (54.6968)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 3.38554e-05 (4.4612)
+Outpt time (%) = 0 (0)
+Other time (%) = 5.29289e-05 (6.97455)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1024 ave 1024 max 1024 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1024
+Ave neighs/atom = 128
+Neighbor list builds = 0
+Dangerous builds = 0
+c11 = 103.471041780481 GPa
+c22 = 103.471041784487 GPa
+c33 = 103.471041750857 GPa
+c12 = 255.637557056255 GPa
+c13 = 255.637557030885 GPa
+c23 = 255.637557042233 GPa
+c44 = 220.648590155395 GPa
+c55 = 220.648590152521 GPa
+c66 = 220.648590173076 GPa
+c14 = -0.000226698380680636 GPa
+c15 = -0.000226789141363664 GPa
+c16 = -0.000226780927023562 GPa
+c24 = -0.000226787105215751 GPa
+c25 = -0.000226709938015843 GPa
+c26 = -0.000226792866891944 GPa
+c34 = -0.000226769401651355 GPa
+c35 = -0.000226782568195885 GPa
+c36 = -0.000226737559446952 GPa
+c45 = -1.95430623633042e-09 GPa
+c46 = -1.04122058035801e-08 GPa
+c56 = -8.23792089252074e-09 GPa
+lammps_sim_done

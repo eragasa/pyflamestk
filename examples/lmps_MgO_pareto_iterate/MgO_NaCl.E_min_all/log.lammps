@@ -1,0 +1,183 @@
+LAMMPS (10 Feb 2015)
+# ---- initialize simulations
+clear
+units metal
+dimension 3
+boundary p p p
+atom_style charge
+atom_modify map array
+# ---- create atoms
+read_data lammps.structure
+  triclinic box = (0 0 0) to (4.2565 4.2565 4.2565) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  8 atoms
+# ---- define interatomic potential
+include potential.mod
+mass 1 24.305
+mass 2 15.999
+
+group magnesium type 1
+4 atoms in group magnesium
+group oxygen type 2
+4 atoms in group oxygen
+
+set group magnesium charge 2.1335249445945137
+  4 settings made for charge
+set group oxygen charge -2.1335249445945137
+  4 settings made for charge
+
+variable R_cut equal 10.0
+
+pair_style buck/coul/long ${R_cut}
+pair_style buck/coul/long 10
+pair_coeff 1 1 0.0 0.5 0.0 ${R_cut}
+pair_coeff 1 1 0.0 0.5 0.0 10
+pair_coeff 1 2 849.3091599660628 0.3025359510724032 0.0 ${R_cut}
+pair_coeff 1 2 849.3091599660628 0.3025359510724032 0.0 10
+pair_coeff 2 2 23489.37888205462 0.3558498499632836 76.7448985072756 ${R_cut}
+pair_coeff 2 2 23489.37888205462 0.3558498499632836 76.7448985072756 10
+
+kspace_style pppm 1.0e-5
+
+neighbor 1.0 bin
+neigh_modify every 1 delay 0 check yes
+
+# ---- define settings
+compute eng all pe/atom
+compute eatoms all reduce sum c_eng
+
+# ---- run minimization
+reset_timestep 0
+fix 1 all box/relax iso 0.0 vmax 0.001
+thermo 10
+thermo_style custom step pe lx ly lz xy xz yz press pxx pyy pzz pxy pxz pyz c_eatoms
+min_style cg
+# energy tolerance = 1e-25, force tolerance = 1e-25
+minimize 1e-25 1e-25 5000 10000
+PPPM initialization ...
+  G vector (1/distance) = 0.355351
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 5.98582e-05
+  estimated relative force accuracy = 4.15692e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Memory usage per processor = 4.06549 Mbytes
+Step PotEng Lx Ly Lz Xy Xz Yz Press Pxx Pyy Pzz Pxy Pxz Pyz eatoms 
+       0   -78.195398       4.2565       4.2565       4.2565            0            0            0    6483241.7    6483241.7    6483241.7    6483241.7 5.854497e-10 1.3193022e-09 1.3343988e-10   -78.195398 
+      10   -87.102895     4.299065     4.299065     4.299065            0            0            0    5751952.6    5751952.6    5751952.6    5751952.6 -5.2181657e-10 -8.9853726e-10 1.9979307e-10   -87.102895 
+      20   -95.162464      4.34163      4.34163      4.34163            0            0            0    5097590.2    5097590.2    5097590.2    5097590.2 2.0806695e-10 -9.9043102e-10 1.397886e-10   -95.162464 
+      30   -102.44184     4.384195     4.384195     4.384195            0            0            0    4512234.7    4512234.7    4512234.7    4512234.7 1.7037086e-10 -3.3899384e-10 -1.9724104e-09   -102.44184 
+      40   -109.00774      4.42676      4.42676      4.42676            0            0            0    3988435.4    3988435.4    3988435.4    3988435.4 4.5183942e-10 1.5207282e-09 1.6022972e-09   -109.00774 
+      50   -114.91956     4.469325     4.469325     4.469325            0            0            0    3519854.9    3519854.9    3519854.9    3519854.9 2.5076223e-10 1.5132958e-09 -3.8652136e-10   -114.91956 
+      60   -120.22938      4.51189      4.51189      4.51189            0            0            0      3100796      3100796      3100796      3100796 4.0068651e-11 4.6217692e-10 -1.2874161e-10   -120.22938 
+      70   -124.99435     4.554455     4.554455     4.554455            0            0            0    2725933.3    2725933.3    2725933.3    2725933.3 -1.248478e-09 6.1854517e-09 6.0521449e-09   -124.99435 
+      80   -129.25716      4.59702      4.59702      4.59702            0            0            0    2390778.1    2390778.1    2390778.1    2390778.1 3.448744e-10 -1.4335493e-09 -3.967069e-10   -129.25716 
+      90   -133.06108     4.639585     4.639585     4.639585            0            0            0    2091102.3    2091102.3    2091102.3    2091102.3 1.1320632e-09 1.2963837e-09 1.4135092e-09   -133.06108 
+     100   -136.44466      4.68215      4.68215      4.68215            0            0            0    1823269.6    1823269.6    1823269.6    1823269.6 -4.0425901e-09 -7.2698142e-10 -1.9140708e-09   -136.44466 
+     110   -139.43887     4.724715     4.724715     4.724715            0            0            0    1584077.2    1584077.2    1584077.2    1584077.2 -2.3166846e-10 1.2431067e-10 -4.330076e-10   -139.43887 
+     120   -142.08665      4.76728      4.76728      4.76728            0            0            0    1370360.1    1370360.1    1370360.1    1370360.1 -1.2496234e-09 -4.6230822e-10 -9.1247002e-10   -142.08665 
+     130   -144.41293     4.809845     4.809845     4.809845            0            0            0    1179568.5    1179568.5    1179568.5    1179568.5 4.9668653e-10 1.5118951e-09 9.9753223e-10   -144.41293 
+     140   -146.44469      4.85241      4.85241      4.85241            0            0            0    1009409.4    1009409.4    1009409.4    1009409.4 7.3136207e-10 6.6221761e-10 -6.8385173e-11   -146.44469 
+     150   -148.20877     4.894975     4.894975     4.894975            0            0            0     857577.7     857577.7     857577.7     857577.7 1.4911738e-09 5.1305172e-10 5.5864431e-10   -148.20877 
+     160   -149.72758      4.93754      4.93754      4.93754            0            0            0    722269.89    722269.89    722269.89    722269.89 -3.0335834e-12 -3.2307287e-10 -7.7004259e-11   -149.72758 
+     170   -151.02241     4.980105     4.980105     4.980105            0            0            0    601776.83    601776.83    601776.83    601776.83 -6.5817889e-10 1.3318938e-09 1.343589e-09   -151.02241 
+     180   -152.11207      5.02267      5.02267      5.02267            0            0            0    494578.73    494578.73    494578.73    494578.73 -5.032508e-10 1.587241e-10 2.9071627e-10   -152.11207 
+     190   -153.01614     5.065235     5.065235     5.065235            0            0            0     399272.8     399272.8     399272.8     399272.8 -4.6252144e-10 -7.6278936e-10 -6.2158762e-10   -153.01614 
+     200   -153.75022       5.1078       5.1078       5.1078            0            0            0    314641.84    314641.84    314641.84    314641.84 1.7939634e-10 -6.9319294e-10 -4.6007074e-10   -153.75022 
+     210   -154.32949     5.150365     5.150365     5.150365            0            0            0     239578.3     239578.3     239578.3     239578.3 5.3882531e-11 2.0239791e-10 -1.2630985e-10   -154.32949 
+     220    -154.7677      5.19293      5.19293      5.19293            0            0            0    173090.87    173090.87    173090.87    173090.87 3.1444192e-10 -8.0269756e-10 -1.5719324e-09    -154.7677 
+     230   -155.07755     5.235495     5.235495     5.235495            0            0            0    114289.47    114289.47    114289.47    114289.47 -1.8371609e-10 -1.3754463e-10 -5.8808505e-10   -155.07755 
+     240   -155.27075      5.27806      5.27806      5.27806            0            0            0    62373.655    62373.655    62373.655    62373.655 6.6742157e-10 6.6430267e-10 4.4439869e-10   -155.27075 
+     250   -155.35795     5.320625     5.320625     5.320625            0            0            0    16625.733    16625.733    16625.733    16625.733 -3.0333271e-10 2.9080046e-10 3.2771012e-10   -155.35795 
+     256   -155.36535    5.3375548    5.3375548    5.3375548            0            0            0  -0.52397353  -0.52397353  -0.52397353  -0.52397352 -4.1787928e-10 -1.049714e-09 -1.0988025e-09   -155.36535 
+Loop time of 0.0881748 on 1 procs for 256 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -78.1953977283     -155.365350482     -155.365350482
+  Force two-norm initial, final = 936.184 0.000315132
+  Force max component initial, final = 936.184 0.000118976
+  Final line search alpha, max atom move = 0.125 1.48719e-05
+  Iterations, force evaluations = 256 264
+
+Pair  time (%) = 0.0195711 (22.1958)
+Kspce time (%) = 0.0154605 (17.5339)
+Neigh time (%) = 0.000169754 (0.19252)
+Comm  time (%) = 0.0022068 (2.50276)
+Outpt time (%) = 0.000413895 (0.469402)
+Other time (%) = 0.0503528 (57.1057)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    1323 ave 1323 max 1323 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    1360 ave 1360 max 1360 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 1360
+Ave neighs/atom = 170
+Neighbor list builds = 3
+Dangerous builds = 0
+
+variable natoms equal "count(all)"
+variable tot_energy equal "c_eatoms"
+variable length_x equal "lx"
+variable length_y equal "ly"
+variable length_z equal "lz"
+variable tilt_xy equal "xy"
+variable tilt_xz equal "xz"
+variable tilt_yz equal "yz"
+variable tot_press equal "press"
+variable press_xx equal "pxx"
+variable press_yy equal "pyy"
+variable press_zz equal "pzz"
+variable press_xy equal "pxy"
+variable press_xz equal "pxz"
+variable press_yz equal "pyz"
+
+variable ecoh equal "pe/atoms"
+#variable ecoh equal "v_etotal/v_atoms"
+# --- output
+print "pyPosMat output section"
+pyPosMat output section
+print "tot_energy = ${tot_energy}"
+tot_energy = -155.365350481969
+print "num_atoms = ${natoms}"
+num_atoms = 8
+print "xx = ${length_x}"
+xx = 5.33755484372874
+print "yy = ${length_y}"
+yy = 5.33755484372874
+print "zz = ${length_z}"
+zz = 5.33755484372874
+print "xy = ${tilt_xy}"
+xy = 0
+print "xz = ${tilt_xz}"
+xz = 0
+print "yz = ${tilt_yz}"
+yz = 0
+print "tot_press = ${tot_press}"
+tot_press = -0.523973525285352
+print "pxx = ${press_xx}"
+pxx = -0.523973525118858
+print "pyy = ${press_yy}"
+pyy = -0.523973525823048
+print "pzz = ${press_zz}"
+pzz = -0.523973524914151
+print "pxy = ${press_xy}"
+pxy = -4.17879278083081e-10
+print "pxz = ${press_xz}"
+pxz = -1.04971404471602e-09
+print "pyz = ${press_yz}"
+pyz = -1.09880247517038e-09
+print "ecoh = ${ecoh}"
+ecoh = -19.4206688102462
+print "lammps_sim_done"
+lammps_sim_done

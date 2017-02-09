@@ -1,0 +1,24 @@
+This folder has a variety of scripts to demonstrate how to created supercells and defect structures for MgO.
+
+Input_Files:
+------------
+MgO_NaCl_unit.vasp - a unit cell structure of MgO in rocksalt.
+
+Scripts:
+--------
+poscar_make_MgO_333.py - makes a 3x3x3 supercell of rocksalt MgO
+poscar_make_MgO_333_fr_a.py - makes a 3x3x3 supercell of rocksalt MgO with an
+	oxygen Frenkel defect.
+poscar_make_MgO_333_fr_c.py - makes a 3x3x3 supercell of rocksalt MgO with an
+        magnesium Frenkel defect
+poscar_make_MgO_333_sch.py - makes a 3x3x3 supercell of rocksalt MgO with an
+        Schottky defect.
+poscar_make_MgO_001_s.py - makes a rocksalt MgO slab with [001] surface
+
+Generated Output Files:
+-----------------------
+poscar_make_MgO_333.py      -> MgO_NaCl_333.vasp
+poscar_make_MgO_333_fr_a.py -> MgO_NaCl_333_fr_a.vasp
+poscar_make_MgO_333_fr_c.py -> MgO_NaCl_333_fr_c.vasp
+poscar_make_MgO_333_sch.py  -> MgO_NaCl_333_sch.vasp
+poscar_make_MgO_001_s.py    -> MgO_NaCl_001_s.vasp

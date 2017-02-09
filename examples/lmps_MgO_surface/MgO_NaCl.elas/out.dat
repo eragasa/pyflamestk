@@ -1,0 +1,908 @@
+LAMMPS (10 Feb 2015)
+Reading data file ...
+  triclinic box = (0 0 0) to (4.2565 4.2565 4.2565) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+PPPM initialization ...
+  G vector (1/distance) = 0.353152
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.10333e-05
+  estimated relative force accuracy = 2.84961e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.78599 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+       0            0    -170.9272   -963607.34   -963607.34   -963607.34   -963607.34 -1.6047184e-10 -4.9691263e-10 -5.8606165e-10       4.2565       4.2565       4.2565    77.118383 
+       1            0   -170.94109   -962945.49   -962945.49   -962945.49   -962945.49 8.3556732e-11 4.5713752e-10 3.1910882e-10    4.2560743    4.2560743    4.2560743     77.09525 
+       2            0   -170.95498   -962282.34   -962282.34   -962282.34   -962282.34 -2.5782741e-10 -9.6750192e-10 -7.2826775e-10    4.2556487    4.2556487    4.2556487    77.072121 
+       3            0   -170.96885   -961617.96   -961617.96   -961617.96   -961617.96 -3.5255058e-10 8.7686947e-10 2.974898e-10     4.255223     4.255223     4.255223    77.048997 
+       4            0   -170.98271   -960951.33   -960951.33   -960951.33   -960951.33 -3.9530172e-11 -5.6323592e-10 -1.1096673e-09    4.2547974    4.2547974    4.2547974    77.025878 
+       5            0   -170.99658   -960283.11   -960283.11   -960283.11   -960283.11 -9.2277925e-11 -1.3611837e-09 -6.5920414e-10    4.2543717    4.2543717    4.2543717    77.002763 
+       6            0   -171.01047   -959614.25   -959614.25   -959614.25   -959614.25 3.9027007e-10 -1.0596752e-11 1.5570185e-10    4.2539461    4.2539461    4.2539461    76.979653 
+       7            0   -171.02431   -958942.71   -958942.71   -958942.71   -958942.71 -2.6134466e-10 -1.2217236e-10 -7.3098009e-11    4.2535204    4.2535204    4.2535204    76.956547 
+       8            0   -171.03813   -958268.61   -958268.61   -958268.61   -958268.61 2.386567e-10 -7.672854e-10 -1.9860522e-11    4.2530948    4.2530948    4.2530948    76.933447 
+       9            0   -171.05191   -957592.58   -957592.58   -957592.58   -957592.58 5.0102858e-11 -4.9746548e-10 -2.9137891e-10    4.2526691    4.2526691    4.2526691     76.91035 
+      10            0    -171.0657   -956914.92   -956914.92   -956914.92   -956914.92 -9.3995053e-11 -3.9663798e-10 -3.2957184e-10    4.2522435    4.2522435    4.2522435    76.887259 
+      11            0   -171.07946   -956235.29   -956235.29   -956235.29   -956235.29 -2.1674242e-10 5.4802233e-10 8.5296943e-10    4.2518178    4.2518178    4.2518178    76.864172 
+      12            0   -171.09323   -955554.42   -955554.42   -955554.42   -955554.42 -3.6369696e-12 4.3691599e-10 3.1044122e-10    4.2513922    4.2513922    4.2513922     76.84109 
+      13            0   -171.10702   -954872.86   -954872.86   -954872.86   -954872.86 -6.0797234e-10 -1.5412321e-10 5.8045675e-12    4.2509665    4.2509665    4.2509665    76.818012 
+      14            0   -171.12079   -954189.35   -954189.35   -954189.35   -954189.35 5.6180259e-12 -2.096158e-10 1.9077435e-10    4.2505409    4.2505409    4.2505409    76.794939 
+      15            0   -171.13457   -953504.33   -953504.33   -953504.33   -953504.33 1.7093733e-10 5.3744901e-10 -3.0710992e-10    4.2501152    4.2501152    4.2501152     76.77187 
+      16            0   -171.14827   -952815.53   -952815.53   -952815.53   -952815.53 -4.2288505e-13 7.1017047e-11 4.5661234e-10    4.2496896    4.2496896    4.2496896    76.748806 
+      17            0   -171.16193   -952124.07   -952124.07   -952124.07   -952124.07 2.6254698e-10 -1.6574599e-10 -5.0087453e-10    4.2492639    4.2492639    4.2492639    76.725747 
+      18            0   -171.17562   -951431.92   -951431.92   -951431.92   -951431.92 1.5211359e-10 -2.4548599e-11 -1.5929804e-10    4.2488383    4.2488383    4.2488383    76.702693 
+      19            0   -171.18927   -950737.74   -950737.74   -950737.74   -950737.74 3.1138482e-10 -2.1110407e-10 -4.4657175e-10    4.2484126    4.2484126    4.2484126    76.679643 
+      20            0   -171.20296   -950043.22   -950043.22   -950043.22   -950043.22 -6.1571072e-11 2.5749675e-10 3.5341446e-10     4.247987     4.247987     4.247987    76.656597 
+      21            0   -171.21664   -949347.03   -949347.03   -949347.03   -949347.03 4.1824974e-10 3.7674574e-10 -2.3052743e-11    4.2475613    4.2475613    4.2475613    76.633556 
+      22            0    -171.2303   -948648.53   -948648.53   -948648.53   -948648.53 4.7914361e-10 6.4323306e-10 5.1873576e-10    4.2471357    4.2471357    4.2471357     76.61052 
+      23            0   -171.24396   -947948.08   -947948.08   -947948.08   -947948.08 1.0183556e-10 -8.7015777e-11 -4.5375218e-10      4.24671      4.24671      4.24671    76.587489 
+      24            0   -171.25759   -947245.55   -947245.55   -947245.55   -947245.55 3.3603886e-10 3.955854e-10 -2.8112518e-10    4.2462844    4.2462844    4.2462844    76.564462 
+      25            0   -171.27114    -946539.4    -946539.4    -946539.4    -946539.4 -1.1835047e-10 -7.8280522e-10 -2.1558581e-10    4.2458587    4.2458587    4.2458587     76.54144 
+      26            0   -171.28472    -945832.7    -945832.7    -945832.7    -945832.7 3.4568468e-10 -1.0469479e-10 -1.0516943e-10    4.2454331    4.2454331    4.2454331    76.518422 
+      27            0   -171.29831      -945125      -945125      -945125      -945125 -1.3743152e-10 -1.1395428e-09 -9.1632457e-10    4.2450074    4.2450074    4.2450074    76.495409 
+      28            0   -171.31189   -944415.07   -944415.07   -944415.07   -944415.07 -2.0431156e-10 -3.2566052e-10 -8.9084337e-11    4.2445818    4.2445818    4.2445818      76.4724 
+      29            0   -171.32546   -943703.47   -943703.47   -943703.47   -943703.47 -2.1536276e-10 -6.9158953e-11 -4.0349729e-10    4.2441561    4.2441561    4.2441561    76.449397 
+      30            0   -171.33901   -942989.76   -942989.76   -942989.76   -942989.76 -3.0160714e-10 -1.3133268e-09 -6.7409189e-10    4.2437305    4.2437305    4.2437305    76.426397 
+      31            0   -171.35254    -942274.3    -942274.3    -942274.3    -942274.3 -1.2418547e-10 6.2136611e-11 -3.6762684e-10    4.2433048    4.2433048    4.2433048    76.403403 
+      32            0   -171.36606   -941556.95   -941556.95   -941556.95   -941556.95 -2.5337604e-10 -6.1103935e-11 -4.0062553e-11    4.2428792    4.2428792    4.2428792    76.380413 
+      33            0   -171.37956   -940837.58   -940837.58   -940837.58   -940837.58 -7.2374169e-11 2.6735968e-10 4.1475983e-10    4.2424535    4.2424535    4.2424535    76.357427 
+      34            0   -171.39305   -940116.36   -940116.36   -940116.36   -940116.36 4.1864907e-10 1.1943175e-09 4.677092e-10    4.2420279    4.2420279    4.2420279    76.334447 
+      35            0   -171.40652   -939393.22   -939393.22   -939393.22   -939393.22 -5.9940134e-10 7.1872829e-10 2.9949647e-10    4.2416022    4.2416022    4.2416022     76.31147 
+      36            0   -171.41999   -938668.32   -938668.32   -938668.32   -938668.32 1.0943974e-10 -3.2842198e-10 5.3038147e-11    4.2411766    4.2411766    4.2411766    76.288499 
+      37            0   -171.43342   -937941.25   -937941.25   -937941.25   -937941.25 8.6762928e-11 -1.7092037e-09 -1.1317351e-09    4.2407509    4.2407509    4.2407509    76.265532 
+      38            0   -171.44683   -937212.24   -937212.24   -937212.24   -937212.24 2.0561876e-10 -2.6259284e-10 -1.234691e-10    4.2403253    4.2403253    4.2403253     76.24257 
+      39            0   -171.46026   -936481.46   -936481.46   -936481.46   -936481.46 -1.6580774e-10 1.528445e-10 6.2088165e-10    4.2398996    4.2398996    4.2398996    76.219612 
+      40            0   -171.47369   -935749.28   -935749.28   -935749.28   -935749.28 6.0096792e-10 2.5698072e-10 -3.1120507e-10     4.239474     4.239474     4.239474    76.196659 
+      41            0   -171.48712   -935016.24   -935016.24   -935016.24   -935016.24 -1.466384e-10 -4.63026e-10 -7.6577959e-10    4.2390483    4.2390483    4.2390483     76.17371 
+      42            0   -171.50052   -934280.53   -934280.53   -934280.53   -934280.53 3.2282898e-10 -2.4833311e-10 9.2798024e-11    4.2386227    4.2386227    4.2386227    76.150766 
+      43            0   -171.51387      -933542      -933542      -933542      -933542 -8.7680692e-11 -6.1415017e-10 -3.5099041e-10     4.238197     4.238197     4.238197    76.127827 
+      44            0    -171.5272   -932801.52   -932801.52   -932801.52   -932801.52 1.1049513e-11 1.6281883e-10 4.5222888e-10    4.2377714    4.2377714    4.2377714    76.104893 
+      45            0   -171.54053   -932058.69   -932058.69   -932058.69   -932058.69 3.4717412e-10 9.206969e-10 6.9708761e-10    4.2373457    4.2373457    4.2373457    76.081962 
+      46            0   -171.55385   -931314.24   -931314.24   -931314.24   -931314.24 -3.0907469e-10 -1.4170993e-09 -1.109831e-09    4.2369201    4.2369201    4.2369201    76.059037 
+      47            0   -171.56717   -930568.72   -930568.72   -930568.72   -930568.72 -6.6680116e-11 -4.9155556e-10 -8.5073026e-10    4.2364944    4.2364944    4.2364944    76.036116 
+      48            0   -171.58049   -929821.67   -929821.67   -929821.67   -929821.67 -3.4048232e-10 -4.7830051e-10 -6.8014195e-10    4.2360688    4.2360688    4.2360688      76.0132 
+      49            0   -171.59384   -929073.91   -929073.91   -929073.91   -929073.91 -4.53629e-10 -2.1634448e-10 1.9111303e-10    4.2356431    4.2356431    4.2356431    75.990288 
+      50            0   -171.60714   -928323.62   -928323.62   -928323.62   -928323.62 -4.8763167e-12 1.2281421e-10 -2.1004866e-10    4.2352175    4.2352175    4.2352175    75.967381 
+      51            0   -171.62037   -927569.11   -927569.11   -927569.11   -927569.11 1.2675568e-10 -1.6076336e-10 -5.5289695e-10    4.2347918    4.2347918    4.2347918    75.944479 
+      52            0   -171.63359   -926812.88   -926812.88   -926812.88   -926812.88 -3.490413e-11 -8.3331844e-10 -8.3857397e-10    4.2343662    4.2343662    4.2343662    75.921581 
+      53            0    -171.6468   -926054.81   -926054.81   -926054.81   -926054.81 4.2783536e-10 -6.5967475e-10 -9.9582563e-10    4.2339405    4.2339405    4.2339405    75.898688 
+      54            0   -171.66001   -925295.44   -925295.44   -925295.44   -925295.44 3.7299876e-10 9.7534825e-10 5.9574662e-10    4.2335149    4.2335149    4.2335149    75.875799 
+      55            0   -171.67324   -924535.04   -924535.04   -924535.04   -924535.04 -4.9675175e-10 -6.5707773e-10 -3.5979959e-10    4.2330892    4.2330892    4.2330892    75.852915 
+      56            0   -171.68646   -923772.82   -923772.82   -923772.82   -923772.82 3.2433022e-10 5.5767837e-10 4.3656824e-10    4.2326636    4.2326636    4.2326636    75.830036 
+      57            0   -171.69967   -923008.68   -923008.68   -923008.68   -923008.68 -7.1342612e-11 -6.1476168e-10 -8.0809606e-10    4.2322379    4.2322379    4.2322379    75.807161 
+      58            0   -171.71285   -922242.28   -922242.28   -922242.28   -922242.28 -4.2816228e-10 -1.6593561e-10 2.554219e-10    4.2318123    4.2318123    4.2318123    75.784291 
+      59            0   -171.72599   -921473.34   -921473.34   -921473.34   -921473.34 -1.0146246e-10  -2.8167e-10 -5.4679032e-10    4.2313866    4.2313866    4.2313866    75.761425 
+      60            0   -171.73908   -920701.55   -920701.55   -920701.55   -920701.55 -1.6308601e-10 -4.2343097e-10 -2.9300979e-10     4.230961     4.230961     4.230961    75.738564 
+      61            0    -171.7522   -919928.63   -919928.63   -919928.63   -919928.63 1.5012473e-10 9.6241778e-10 3.0428485e-10    4.2305353    4.2305353    4.2305353    75.715708 
+      62            0   -171.76533   -919154.17   -919154.17   -919154.17   -919154.17 -3.6483798e-10 2.337504e-10 5.5272459e-10    4.2301097    4.2301097    4.2301097    75.692856 
+      63            0   -171.77842   -918377.01   -918377.01   -918377.01   -918377.01 -3.9316051e-10 -4.7381253e-12 3.3354413e-10     4.229684     4.229684     4.229684    75.670008 
+      64            0   -171.79153   -917598.76   -917598.76   -917598.76   -917598.76 -2.3945634e-10 3.2748662e-10 5.6898827e-10    4.2292584    4.2292584    4.2292584    75.647166 
+      65            0    -171.8046    -916818.6    -916818.6    -916818.6    -916818.6 1.0616199e-10 4.9613175e-10 5.7289257e-10    4.2288327    4.2288327    4.2288327    75.624328 
+      66            0   -171.81768   -916037.08   -916037.08   -916037.08   -916037.08 3.3047585e-10 1.2040093e-09 3.9363458e-10    4.2284071    4.2284071    4.2284071    75.601494 
+      67            0   -171.83073    -915253.3    -915253.3    -915253.3    -915253.3 1.5704815e-10 1.9156059e-10 2.6689222e-10    4.2279814    4.2279814    4.2279814    75.578666 
+      68            0   -171.84376   -914466.75   -914466.75   -914466.75   -914466.75 4.3421884e-10 -3.4378255e-10 -2.883956e-11    4.2275558    4.2275558    4.2275558    75.555841 
+      69            0   -171.85677   -913677.64   -913677.64   -913677.64   -913677.64 -2.2831336e-10 -5.5744331e-10 -8.7739834e-10    4.2271301    4.2271301    4.2271301    75.533022 
+      70            0   -171.86977   -912886.81   -912886.81   -912886.81   -912886.81 -3.7177759e-11 -1.4732846e-10 -4.4225452e-10    4.2267045    4.2267045    4.2267045    75.510207 
+      71            0   -171.88275   -912094.24   -912094.24   -912094.24   -912094.24 2.949772e-10 1.4498898e-10 1.8416617e-10    4.2262788    4.2262788    4.2262788    75.487396 
+      72            0   -171.89572   -911300.48   -911300.48   -911300.48   -911300.48 4.145063e-10 -6.3391137e-10 -1.8932001e-10    4.2258532    4.2258532    4.2258532     75.46459 
+      73            0   -171.90869   -910504.73   -910504.73   -910504.73   -910504.73 7.8020991e-11 -8.8168879e-11 9.7612048e-11    4.2254275    4.2254275    4.2254275    75.441789 
+      74            0   -171.92164   -909706.34   -909706.34   -909706.34   -909706.34 8.6387073e-10 9.4354915e-10 4.8588309e-10    4.2250019    4.2250019    4.2250019    75.418992 
+      75            0   -171.93461   -908907.11   -908907.11   -908907.11   -908907.11 -8.8505221e-10 -4.8808509e-10 -7.9865404e-10    4.2245762    4.2245762    4.2245762      75.3962 
+      76            0   -171.94759   -908106.36   -908106.36   -908106.36   -908106.36 1.037104e-10 -1.3048852e-10 2.4131144e-10    4.2241506    4.2241506    4.2241506    75.373413 
+      77            0   -171.96047    -907301.6    -907301.6    -907301.6    -907301.6 5.8169379e-11 1.2507886e-09 1.1402317e-09    4.2237249    4.2237249    4.2237249     75.35063 
+      78            0   -171.97333   -906494.53   -906494.53   -906494.53   -906494.53 9.701443e-11 -8.05427e-10 -5.0929118e-10    4.2232993    4.2232993    4.2232993    75.327852 
+      79            0   -171.98619   -905685.79   -905685.79   -905685.79   -905685.79 3.6169493e-10 5.5649811e-11 4.7040641e-10    4.2228736    4.2228736    4.2228736    75.305078 
+      80            0   -171.99903   -904875.02   -904875.02   -904875.02   -904875.02 2.2016124e-10 6.2436628e-11 -1.926399e-10     4.222448     4.222448     4.222448    75.282309 
+      81            0   -172.01187    -904062.3    -904062.3    -904062.3    -904062.3 3.5145797e-11 -4.2615808e-10 3.3529187e-10    4.2220223    4.2220223    4.2220223    75.259544 
+      82            0   -172.02473   -903249.04   -903249.04   -903249.04   -903249.04 -5.0312432e-10 -5.4300282e-10 -4.7551596e-10    4.2215967    4.2215967    4.2215967    75.236784 
+      83            0   -172.03759   -902433.96   -902433.96   -902433.96   -902433.96 2.4353971e-10 4.1746453e-10 2.6855368e-11     4.221171     4.221171     4.221171    75.214029 
+      84            0   -172.05043   -901617.03   -901617.03   -901617.03   -901617.03 7.2067549e-11 -5.2523088e-10 -4.4357619e-10    4.2207454    4.2207454    4.2207454    75.191278 
+      85            0   -172.06322   -900796.98   -900796.98   -900796.98   -900796.98 -3.6206825e-10 5.0125947e-10 8.3211131e-10    4.2203197    4.2203197    4.2203197    75.168532 
+      86            0   -172.07598   -899973.49   -899973.49   -899973.49   -899973.49 5.3356293e-10 1.3109414e-10 -2.1317737e-11    4.2198941    4.2198941    4.2198941     75.14579 
+      87            0    -172.0887   -899148.13   -899148.13   -899148.13   -899148.13 -2.9292202e-10 2.6308851e-10 2.8396642e-10    4.2194684    4.2194684    4.2194684    75.123053 
+      88            0   -172.10142   -898321.13   -898321.13   -898321.13   -898321.13 3.7861392e-10 1.6327793e-10 -3.3430306e-10    4.2190428    4.2190428    4.2190428    75.100321 
+      89            0   -172.11419   -897493.61   -897493.61   -897493.61   -897493.61 -4.378359e-10 8.4701937e-10 5.9610027e-10    4.2186171    4.2186171    4.2186171    75.077593 
+      90            0   -172.12694   -896664.44   -896664.44   -896664.44   -896664.44 -3.4739924e-11 -3.51109e-10 -1.0899204e-10    4.2181915    4.2181915    4.2181915     75.05487 
+      91            0   -172.13966   -895832.65   -895832.65   -895832.65   -895832.65 2.8878674e-10 -1.6279952e-10 -3.8186298e-10    4.2177658    4.2177658    4.2177658    75.032151 
+      92            0   -172.15239   -894998.94   -894998.94   -894998.94   -894998.94 2.814709e-10 6.5069924e-10 6.0958881e-10    4.2173402    4.2173402    4.2173402    75.009437 
+      93            0   -172.16507   -894162.55   -894162.55   -894162.55   -894162.55 3.0957733e-11 7.4465003e-10 5.4360382e-10    4.2169145    4.2169145    4.2169145    74.986728 
+      94            0    -172.1777   -893322.96   -893322.96   -893322.96   -893322.96 1.1055275e-10 -8.230405e-10 -8.693258e-10    4.2164889    4.2164889    4.2164889    74.964023 
+      95            0   -172.19031   -892481.24   -892481.24   -892481.24   -892481.24 2.2458909e-10 -2.3367692e-10 -1.0512007e-09    4.2160632    4.2160632    4.2160632    74.941322 
+      96            0   -172.20297   -891639.44   -891639.44   -891639.44   -891639.44 5.5581116e-10 2.9576401e-10 -2.0791247e-10    4.2156376    4.2156376    4.2156376    74.918627 
+      97            0   -172.21559   -890794.81   -890794.81   -890794.81   -890794.81 -1.0349799e-10 -3.3518456e-10 -3.6746962e-10    4.2152119    4.2152119    4.2152119    74.895936 
+      98            0   -172.22821   -889948.32   -889948.32   -889948.32   -889948.32 -4.0693482e-11 -5.2965644e-10 -2.5696193e-12    4.2147863    4.2147863    4.2147863    74.873249 
+      99            0   -172.24081    -889099.7    -889099.7    -889099.7    -889099.7 6.987745e-11 1.4085006e-09 1.0668826e-09    4.2143606    4.2143606    4.2143606    74.850567 
+     100            0    -172.2534   -888249.04   -888249.04   -888249.04   -888249.04 7.1444341e-11 -1.0910781e-09 -7.9630414e-10     4.213935     4.213935     4.213935     74.82789 
+Loop time of 0.056823 on 1 procs for 100 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = max iterations
+  Energy initial, next-to-last, final = 
+        -170.927197456     -172.240812811     -172.253399312
+  Force two-norm initial, final = 80.3356 72.5794
+  Force max component initial, final = 46.3818 41.9037
+  Final line search alpha, max atom move = 2.38366e-06 9.98841e-05
+  Iterations, force evaluations = 100 100
+
+Pair  time (%) = 0.0163567 (28.7854)
+Kspce time (%) = 0.00869012 (15.2933)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.00160646 (2.82714)
+Outpt time (%) = 0.00153399 (2.69958)
+Other time (%) = 0.0286357 (50.3946)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2344 ave 2344 max 2344 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2344
+Ave neighs/atom = 293
+Neighbor list builds = 0
+Dangerous builds = 0
+System init for write_restart ...
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79299e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23521 4.23522 4.23522) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79298e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25343    -888245.6   -888245.31   -888245.75   -888245.75 8.2017216e-10 6.6894874e-11 -3.9448899e-10    4.2139308     4.213935     4.213935    74.827815 
+     101            0   -172.25344   -888245.66    -888245.5   -888245.74   -888245.74 2.5425018e-09 -2.7949399e-09 -1.2335761e-09    4.2139308     4.213935     4.213935    74.827815 
+     102            0   -172.25344   -888245.66    -888245.5   -888245.74   -888245.74 2.5425018e-09 -2.7949399e-09 -1.2335761e-09    4.2139308     4.213935     4.213935    74.827815 
+Loop time of 0.00371909 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253431325     -172.253435286     -172.253435286
+  Force two-norm initial, final = 0.00381862 0.000748957
+  Force max component initial, final = 0.00107975 0.000212291
+  Final line search alpha, max atom move = 0.015625 3.31705e-06
+  Iterations, force evaluations = 2 15
+
+Pair  time (%) = 0.00202107 (54.3432)
+Kspce time (%) = 0.00139236 (37.4383)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000215054 (5.78242)
+Outpt time (%) = 1.50204e-05 (0.403872)
+Other time (%) = 7.55787e-05 (2.03218)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79299e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25335    -888251.1    -888251.2   -888251.06   -888251.06 -1.4008271e-09 2.3082871e-09 1.3437512e-09    4.2139392     4.213935     4.213935    74.827964 
+     101            0   -172.25335   -888251.23   -888251.45   -888251.11   -888251.11 -4.7996415e-11 1.4264246e-09 -2.2479661e-10    4.2139392     4.213935     4.213935    74.827964 
+     102            0   -172.25335   -888251.23   -888251.45   -888251.11   -888251.11 -4.7996415e-11 1.4264246e-09 -2.2479661e-10    4.2139392     4.213935     4.213935    74.827964 
+Loop time of 0.00341201 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253345312      -172.25335072      -172.25335072
+  Force two-norm initial, final = 0.00381805 0.000746807
+  Force max component initial, final = 0.00107953 0.000211422
+  Final line search alpha, max atom move = 0.015625 3.30347e-06
+  Iterations, force evaluations = 2 15
+
+Pair  time (%) = 0.00186467 (54.6503)
+Kspce time (%) = 0.00110602 (32.4156)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000277281 (8.12662)
+Outpt time (%) = 1.50204e-05 (0.440221)
+Other time (%) = 0.000149012 (4.36727)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23521 4.23522) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79298e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25343    -888245.6   -888245.75   -888245.31   -888245.75 -2.8980608e-10 -1.0824736e-09 4.1245303e-10     4.213935    4.2139308     4.213935    74.827815 
+     101            0   -172.25344   -888245.66   -888245.74    -888245.5   -888245.74 -2.2389967e-09 -8.4114589e-10 -3.0532349e-09     4.213935    4.2139308     4.213935    74.827815 
+     102            0   -172.25344   -888245.66   -888245.74    -888245.5   -888245.74 -2.2389967e-09 -8.4114589e-10 -3.0532349e-09     4.213935    4.2139308     4.213935    74.827815 
+Loop time of 0.00293612 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253431325     -172.253435286     -172.253435286
+  Force two-norm initial, final = 0.00381862 0.000748957
+  Force max component initial, final = 0.00107975 0.000212291
+  Final line search alpha, max atom move = 0.015625 3.31705e-06
+  Iterations, force evaluations = 2 15
+
+Pair  time (%) = 0.00164795 (56.1267)
+Kspce time (%) = 0.000990152 (33.7231)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000210524 (7.17012)
+Outpt time (%) = 2.09808e-05 (0.714576)
+Other time (%) = 6.65188e-05 (2.26553)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79299e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25335    -888251.1   -888251.06    -888251.2   -888251.06 1.7165688e-09 7.6708111e-10 1.9393552e-09     4.213935    4.2139392     4.213935    74.827964 
+     101            0   -172.25335   -888251.23   -888251.11   -888251.45   -888251.11 -6.0395014e-10 1.5786923e-09 1.904594e-09     4.213935    4.2139392     4.213935    74.827964 
+     102            0   -172.25335   -888251.23   -888251.11   -888251.45   -888251.11 -6.0395014e-10 1.5786923e-09 1.904594e-09     4.213935    4.2139392     4.213935    74.827964 
+Loop time of 0.00446105 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253345312      -172.25335072      -172.25335072
+  Force two-norm initial, final = 0.00381805 0.000746807
+  Force max component initial, final = 0.00107953 0.000211422
+  Final line search alpha, max atom move = 0.015625 3.30347e-06
+  Iterations, force evaluations = 2 15
+
+Pair  time (%) = 0.00220323 (49.3881)
+Kspce time (%) = 0.00174165 (39.0412)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000322819 (7.23639)
+Outpt time (%) = 2.00272e-05 (0.448934)
+Other time (%) = 0.00017333 (3.88541)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23521) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79298e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25343    -888245.6   -888245.75   -888245.75   -888245.31 -3.3751004e-09 -4.3574832e-10 2.524288e-10     4.213935     4.213935    4.2139308    74.827815 
+     101            0   -172.25344   -888245.66   -888245.74   -888245.74    -888245.5 1.0639949e-09 1.6844747e-09 1.6731089e-09     4.213935     4.213935    4.2139308    74.827815 
+     102            0   -172.25344   -888245.66   -888245.74   -888245.74    -888245.5 1.0639949e-09 1.6844747e-09 1.6731089e-09     4.213935     4.213935    4.2139308    74.827815 
+Loop time of 0.00406313 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253431325     -172.253435286     -172.253435286
+  Force two-norm initial, final = 0.00381862 0.000748957
+  Force max component initial, final = 0.00107975 0.000212291
+  Final line search alpha, max atom move = 0.015625 3.31705e-06
+  Iterations, force evaluations = 2 15
+
+Pair  time (%) = 0.0020721 (50.9975)
+Kspce time (%) = 0.00149941 (36.9029)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000350952 (8.63748)
+Outpt time (%) = 2.59876e-05 (0.639596)
+Other time (%) = 0.000114679 (2.82244)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79299e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25335    -888251.1   -888251.06   -888251.06    -888251.2 -1.5869434e-09 -8.9743487e-10 -1.2979269e-11     4.213935     4.213935    4.2139392    74.827964 
+     101            0   -172.25335   -888251.23   -888251.11   -888251.11   -888251.45 1.0764271e-09 -1.9273213e-09 -1.2266516e-09     4.213935     4.213935    4.2139392    74.827964 
+     102            0   -172.25335   -888251.23   -888251.11   -888251.11   -888251.45 1.0764271e-09 -1.9273213e-09 -1.2266516e-09     4.213935     4.213935    4.2139392    74.827964 
+Loop time of 0.00280499 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253345312      -172.25335072      -172.25335072
+  Force two-norm initial, final = 0.00381805 0.000746807
+  Force max component initial, final = 0.00107953 0.000211422
+  Final line search alpha, max atom move = 0.015625 3.30347e-06
+  Iterations, force evaluations = 2 15
+
+Pair  time (%) = 0.00160885 (57.3566)
+Kspce time (%) = 0.000908136 (32.3757)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000184774 (6.58734)
+Outpt time (%) = 7.86781e-06 (0.280493)
+Other time (%) = 9.53674e-05 (3.39992)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 -4.21393e-06)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79298e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25339   -888248.43   -888248.47    -888248.4    -888248.4 -6.8606417e-10 -1.5562592e-09    4.4564967     4.213935     4.213935     4.213935     74.82789 
+     101            0   -172.25339   -888248.46   -888248.48   -888248.45   -888248.45 -8.2164313e-10 2.0861886e-09    4.4687636     4.213935     4.213935     4.213935     74.82789 
+     102            0   -172.25339   -888248.46   -888248.48   -888248.45   -888248.45 -1.0154554e-09 2.1247244e-09    4.4687636     4.213935     4.213935     4.213935     74.82789 
+Loop time of 0.00342202 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253393137     -172.253393622     -172.253393622
+  Force two-norm initial, final = 0.00381819 0.000754073
+  Force max component initial, final = 0.00107959 0.000214353
+  Final line search alpha, max atom move = 0.015625 3.34927e-06
+  Iterations, force evaluations = 2 19
+
+Pair  time (%) = 0.00205016 (59.9108)
+Kspce time (%) = 0.0010941 (31.9724)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000210047 (6.13809)
+Outpt time (%) = 1.3113e-05 (0.383195)
+Other time (%) = 5.45979e-05 (1.59549)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 4.21393e-06)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79299e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25339   -888248.43   -888248.47    -888248.4    -888248.4 -3.1716442e-10 -1.011794e-09   -4.4564967     4.213935     4.213935     4.213935     74.82789 
+     101            0   -172.25339   -888248.46   -888248.48   -888248.45   -888248.45 -1.216454e-09 -1.7621598e-10   -4.4687636     4.213935     4.213935     4.213935     74.82789 
+     102            0   -172.25339   -888248.46   -888248.48   -888248.45   -888248.45 -3.7386278e-11 -3.2835375e-10   -4.4687636     4.213935     4.213935     4.213935     74.82789 
+Loop time of 0.00616503 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253393138     -172.253393623     -172.253393623
+  Force two-norm initial, final = 0.00381819 0.000754073
+  Force max component initial, final = 0.00107959 0.000214353
+  Final line search alpha, max atom move = 0.015625 3.34927e-06
+  Iterations, force evaluations = 2 19
+
+Pair  time (%) = 0.00411677 (66.7762)
+Kspce time (%) = 0.0015955 (25.8798)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000299931 (4.86503)
+Outpt time (%) = 2.09808e-05 (0.34032)
+Other time (%) = 0.000131845 (2.1386)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 -4.21393e-06 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79298e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25339   -888248.43    -888248.4   -888248.47    -888248.4 -1.0036762e-10    4.4564967 -5.6107257e-10     4.213935     4.213935     4.213935     74.82789 
+     101            0   -172.25339   -888248.46   -888248.45   -888248.48   -888248.45 4.8484142e-10    4.4687636 1.5627275e-09     4.213935     4.213935     4.213935     74.82789 
+     102            0   -172.25339   -888248.46   -888248.45   -888248.48   -888248.45 -1.80766e-10    4.4687636 1.4105711e-09     4.213935     4.213935     4.213935     74.82789 
+Loop time of 0.00475192 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253393137     -172.253393622     -172.253393622
+  Force two-norm initial, final = 0.00381819 0.000754073
+  Force max component initial, final = 0.00107959 0.000214353
+  Final line search alpha, max atom move = 0.015625 3.34927e-06
+  Iterations, force evaluations = 2 19
+
+Pair  time (%) = 0.00283957 (59.7562)
+Kspce time (%) = 0.00154757 (32.5674)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000271797 (5.71973)
+Outpt time (%) = 1.38283e-05 (0.291004)
+Other time (%) = 7.9155e-05 (1.66575)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 4.21393e-06 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79299e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25339   -888248.43    -888248.4   -888248.47    -888248.4 -2.6425654e-09   -4.4564967 -1.4302564e-09     4.213935     4.213935     4.213935     74.82789 
+     101            0   -172.25339   -888248.46   -888248.45   -888248.48   -888248.45 -3.6103472e-10   -4.4687636 -9.8523256e-10     4.213935     4.213935     4.213935     74.82789 
+     102            0   -172.25339   -888248.46   -888248.45   -888248.48   -888248.45 3.8308374e-11   -4.4687636 -3.7653288e-10     4.213935     4.213935     4.213935     74.82789 
+Loop time of 0.0045619 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253393138     -172.253393623     -172.253393623
+  Force two-norm initial, final = 0.00381819 0.000754073
+  Force max component initial, final = 0.00107959 0.000214353
+  Final line search alpha, max atom move = 0.015625 3.34927e-06
+  Iterations, force evaluations = 2 19
+
+Pair  time (%) = 0.0026505 (58.1008)
+Kspce time (%) = 0.00148797 (32.6173)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000286341 (6.27678)
+Outpt time (%) = 1.50204e-05 (0.329257)
+Other time (%) = 0.00012207 (2.67586)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (-4.21393e-06 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79298e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25339   -888248.43    -888248.4    -888248.4   -888248.47    4.4564967 2.134971e-09 1.6907734e-09     4.213935     4.213935     4.213935     74.82789 
+     101            0   -172.25339   -888248.46   -888248.45   -888248.45   -888248.48    4.4687636 8.2539714e-10 -1.1958005e-09     4.213935     4.213935     4.213935     74.82789 
+     102            0   -172.25339   -888248.46   -888248.45   -888248.45   -888248.48    4.4687636 1.6431377e-09 -1.1601432e-09     4.213935     4.213935     4.213935     74.82789 
+Loop time of 0.00382113 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253393137     -172.253393622     -172.253393622
+  Force two-norm initial, final = 0.00381819 0.000754073
+  Force max component initial, final = 0.00107959 0.000214353
+  Final line search alpha, max atom move = 0.015625 3.34927e-06
+  Iterations, force evaluations = 2 19
+
+Pair  time (%) = 0.00219345 (57.4031)
+Kspce time (%) = 0.00130558 (34.1673)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.00022769 (5.95869)
+Outpt time (%) = 1.4782e-05 (0.386847)
+Other time (%) = 7.96318e-05 (2.08398)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+Reading restart file ...
+  restart file = 10 Feb 2015, LAMMPS = 10 Feb 2015
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  8 atoms
+4 atoms in group magnesium
+4 atoms in group oxygen
+Setting atom values ...
+  4 settings made for charge
+Setting atom values ...
+  4 settings made for charge
+Changing box ...
+  triclinic box = (0.0212825 0.0212825 0.0212825) to (4.23522 4.23522 4.23522) with tilt (4.21393e-06 0 0)
+PPPM initialization ...
+  G vector (1/distance) = 0.353588
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 4.0218e-05
+  estimated relative force accuracy = 2.79299e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Setting up minimization ...
+Memory usage per processor = 3.77377 Mbytes
+Step Temp PotEng Press Pxx Pyy Pzz Pxy Pxz Pyz Lx Ly Lz Volume 
+     100            0   -172.25339   -888248.43    -888248.4    -888248.4   -888248.47   -4.4564967 -5.8377647e-10 3.8119433e-10     4.213935     4.213935     4.213935     74.82789 
+     101            0   -172.25339   -888248.46   -888248.45   -888248.45   -888248.48   -4.4687636 -7.0536461e-10 -1.8479137e-10     4.213935     4.213935     4.213935     74.82789 
+     102            0   -172.25339   -888248.46   -888248.45   -888248.45   -888248.48   -4.4687636 -6.7329162e-10 -7.9807821e-10     4.213935     4.213935     4.213935     74.82789 
+Loop time of 0.00381207 on 1 procs for 2 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -172.253393138     -172.253393623     -172.253393623
+  Force two-norm initial, final = 0.00381819 0.000754073
+  Force max component initial, final = 0.00107959 0.000214353
+  Final line search alpha, max atom move = 0.015625 3.34927e-06
+  Iterations, force evaluations = 2 19
+
+Pair  time (%) = 0.00228906 (60.0475)
+Kspce time (%) = 0.00118375 (31.0526)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000235081 (6.16674)
+Outpt time (%) = 1.28746e-05 (0.337732)
+Other time (%) = 9.13143e-05 (2.3954)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2472 ave 2472 max 2472 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2472
+Ave neighs/atom = 309
+Neighbor list builds = 0
+Dangerous builds = 0
+c11 = 297.559598303632 GPa
+c22 = 297.559598251246 GPa
+c33 = 297.559598699445 GPa
+c12 = 268.584817097872 GPa
+c13 = 268.584816972726 GPa
+c23 = 268.584817051305 GPa
+c44 = 446.876364821438 GPa
+c55 = 446.876364684784 GPa
+c66 = 446.876364667783 GPa
+c14 = 0.000705474913837015 GPa
+c15 = 0.00070519378278682 GPa
+c16 = 0.000705439749331038 GPa
+c24 = 0.000705251041153683 GPa
+c25 = 0.000705413443947147 GPa
+c26 = 0.000705383587211179 GPa
+c34 = 0.000705496957387262 GPa
+c35 = 0.000705465281775165 GPa
+c36 = 0.000705549299043884 GPa
+c45 = 1.06004554918405e-07 GPa
+c46 = -3.35033509208659e-08 GPa
+c56 = 5.24338733067882e-08 GPa
+lammps_sim_done

@@ -1,0 +1,9 @@
+Requirements:
+1.    PYTHONPATH must include the pyflamestk module
+2.    LAMMPS_BIN must be set to the LAMMPS binary
+
+to run this simulation, run
+
+>python buckingham_pareto.py
+
+
