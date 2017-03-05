@@ -10,44 +10,44 @@ import numpy as np
 
 class Atom(object):
     """description of an atom"""
-   def __init__(self, symbol, position, magmom = 0):
-       """__init__ method
-       Args:
-           symbol (str): the standard ISO symbol for an element
-           position (list of float): the position of the atom the units
-              are dependent upon use.
-           magmom (float): the magnetic moment of the atom
-       """
-       self._symbol = symbol
-       self._position = position
-       self._magnetic_moment = magmom
+    def __init__(self, symbol, position, magmom = 0):
+        """constructor
+
+        Args:
+        symbol (str): the standard ISO symbol for an element
+        position (list of float): the position of the atom the units
+           are dependent upon use.
+        magmom (float): the magnetic moment of the atom"""
+        self._symbol = symbol
+        self._position = position
+        self._magnetic_moment = magmom
        
-   @property
-   def symbol(self):
-       """str: the standard ISO symbol for an element"""
-       return self._symbol
+    @property
+    def symbol(self):
+        """str: the standard ISO symbol for an element"""
+        return self._symbol
        
-   @symbol.setter
-   def symbol(self,s): 
-       self._symbol = s
+    @symbol.setter
+    def symbol(self,s): 
+        self._symbol = s
        
-   @property
-   def position(self):
-       """list of float: the position of the atom."""
-       return np.array(self._position)
+    @property
+    def position(self):
+        """list of float: the position of the atom."""
+        return np.array(self._position)
        
-   @position.setter
-   def position(self,p):
-       self._position = np.aray(p)
+    @position.setter
+    def position(self,p):
+        self._position = np.aray(p)
            
-   @property
-   def magnetic_moment(self): 
-       """float: the magnetic moment of the atom."""
-       return self._magnetic_moment
+    @property
+    def magnetic_moment(self): 
+        """float: the magnetic moment of the atom."""
+        return self._magnetic_moment
        
-   @magnetic_moment.setter
-   def magnetic_moment(self,m): 
-       self._magnetic_moment = m
+    @magnetic_moment.setter
+    def magnetic_moment(self,m): 
+        self._magnetic_moment = m
 
 class Structure(object):
     """A structural representation of a material system
@@ -57,22 +57,23 @@ class Structure(object):
         defined by the H-matrix.
 
     Todo:
-        This module is only written to deal with cells with orthogonal unit vectors.  
+        This module is only written to deal with cells with orthogonal 
+        unit vectors.  
 
     """ 
     def __init__(self, obj=None):
         """__init__
 
         Args:
-            obj (pyflamestk.base.Structure,optional): if this argument is set then the
-               this constructor acts as a copy constructor. 
+            obj (pyflamestk.base.Structure,optional): if this argument is set
+                then the this constructor acts as a copy constructor. 
         """
         if obj is None:
             assert type(object),pyflamestk.base.Structure
             self._noncopy_init()
         else:
             self._copy_init(obj)
-        self._ptol = 1.e-5
+        self._ptol = 1.e-5 #tolerance in which to find an atom
         self._vacancies = []
         self._interstitials = []
             
@@ -88,6 +89,11 @@ class Structure(object):
         self._h_matrix = np.array(obj.h_matrix)
         
         self._atoms = copy.deepcopy(obj.atoms)
+
+    @property
+    def a0(self):
+        """float: the lattice parameter of this structure"""
+        return self._lattice_parameter
 
     @property
     def a1(self):
@@ -271,7 +277,6 @@ class Structure(object):
             raise ValueError(err_msg)
         else:
             self._atoms.append(Atom(symbol,position))
-            self._interstitials.append([symbol,position])
 
     def remove_atom(self,symbol, position):
         """ remove an atom from the structure
@@ -287,14 +292,28 @@ class Structure(object):
         for i,a in enumerate(self._atoms):
             if (a.symbol == symbol):
                 diff = [abs(position[j]-a.position[j]) for j in range(3)]
-                if max(diff) < self._ptol:
+                print(diff)
+                is_atom = True
+                for j in range(3):
+                    if diff[j] >= self._ptol:
+                        is_atom = False
+                if is_atom:
                     self._atoms.remove(self._atoms[i])
-                    self._vacancies.append([symbol,position])
                     return
+
         # no atom found
         err_msg = "Tried to remove {} @ {}, no atom found"
         err_msg = err_msg.format(symbol,position)
         raise ValueError(err_msg)
+
+    def add_interstitial(self,symbol,position):
+        self.add_atom(symbol,position)
+        self._interstitiials.append([symbol,position])
+
+    def add_vacancy(self,symbol,position):
+        self.remove_atom(symbol,position)
+        self._vacancy.append([symbol,position])
+
 
     def get_number_of_atoms(self, symbol=None):
         if symbol is None:
