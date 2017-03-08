@@ -1,15 +1,21 @@
-import copy
-import os
-import os.path
-import shutil
-import subprocess
-import numpy as np
-import time
+# -*- coding: utf-8 -*-
+"""This module contains the pyposmat engine for parameterization"""
+__author__ = "Eugene J. Ragasa"
+__copyright__ = "Copyright (C) 2016,2017"
+__license__ = "Simplified BSD License"
+__version__ = "1.0"
 
+import time
+import copy, shutil, os.path
+import os, subprocess
+
+import numpy as np
 import scipy.stats
+
 import pyflamestk.lammps as lammps
 import pyflamestk.base as base
 import pyflamestk.qoi as qoi
+import pyflamestk.pareto as pareto
 
 class PyPosmatError(Exception):
   """Exception handling class for pyposmat"""
@@ -19,7 +25,7 @@ class PyPosmatError(Exception):
   def __str__(self):
     return repr(self.value)
 
-class PyPosmatEngine:
+class PyPosmatEngine(object):
 
     def __init__(self,
                  fname_config_pyposmat = "pyposmat.config",
@@ -28,13 +34,26 @@ class PyPosmatEngine:
                  is_read = True,
                  is_restart = False,
                  random_seed = None):
+        """default constructor
 
+        this is the default constructor for the PyPosmatEngine is also 
+        provides the base functionality and is designed so that it can be
+        subclassed and extended for different types of implementation.
+
+        Args:
+            fname_config_pyposmat (str): the location of the pyposmat.config 
+            fname_config_potential (str): the location of pyposmat.potential
+            fname_config_qoi (str): the location of pyposmat.qoi
+            is_read (bool): if set to True, then the configuration files will
+                read
+        """
         self._fname_config_pyposmat = fname_config_pyposmat
         self._fname_config_potential = fname_config_potential
         self._fname_config_qoi = fname_config_qoi
 
         self._is_read = is_read        # TODO: is this variable even used?
-        self._is_restart = is_restart  # if set to true, try to recover previous simulations
+        self._is_restart = is_restart  # if set to true, 
+                                       # try to recover previous simulations
 
         if (random_seed is not None) and (not is_restart):
             self._random_seed = random_seed
@@ -143,6 +162,13 @@ class PyPosmatEngine:
     def _log(self,msg):
         print(msg)
         self._f_log.write(msg+'\n')
+
+    def _restart_simulations(self):
+        """
+        this protected method implements the mechanism for restarting
+        simulations
+        """
+        return start_sim_id
 
     def sample_parameter_space(self,
                                n_simulations,
@@ -579,6 +605,80 @@ class PyPosmatEngine:
 
     def _check_potential_parameters(self): pass
 
+class IterativeSampler(PyPosmatEngine):
+
+    def __init__(self,
+                 n_iterations,
+                 n_simulations,
+                 cull_type,
+                 cull_param):
+
+        # formatting strings
+        self._iter_dir_format = "iter_{:03d}"
+        self._fname_results_format = "results_{:03d}.out"
+        self._fname_pareto_format = "pareto_{:03d}.out"
+        self._fname_culled_format = "culled_{:03d}.out"
+
+        # names of configuration files
+        fname_config = 'pyposmat.config'
+        fname_qoi = 'pyposmat.qoi'
+        fname_potential = 'pyposmat.potential'
+
+        PyPosmatEngine.__init__(self)
+
+        # protected member variables
+        self._n_iterations = n_iterations
+        self._n_simulations = n_simulations
+        self._cull_type = cull_type
+        self._cull_param = cull_param
+
+    @property
+    def n_iterations(self):
+        return self._n_iterations
+
+    @n_iterations.setter
+    def n_iterations(self, val):
+        self._n_iterations = val
+
+    @property
+    def n_simulations(self):
+        return self._n_simulations
+
+    @n_simulations.setter
+    def n_simulations(self, n_sims):
+        self._n_simulations = n_sims
+
+    def run(self,n_iterations=None):
+        if n_iterations is not None:
+            self._n_iterations = n_iterations
+
+        for i_iter in range(self._n_iterations):
+            self._log('starting iteration loop {}'.format(i_iter))
+            fname_results_out = self._fname_results_format.format(i_iter)
+            fname_pareto_out  = self._fname_pareto_format.format(i_iter)
+            fname_culled_out  = self._fname_culled_format.format(i_iter)
+            # generations
+            if i_iter == 0:
+                # use uniform sampling the first time around
+                self.sample_parameter_space(n_simulations = self._n_simulations,
+                                            fname_results = fname_results_out,
+                                            sampler_type = 'uniform')
+            else:
+                # use the culled results from the previous iteration
+                fname_results_in = self._fname_culled_format.format(i_iter-1)
+
+                self.sample_parameter_space(n_simulations = self._n_simulations,
+                                            fname_results = fname_results_out,
+                                            sampler_type = 'kde',
+                                            fname_results_in = fname_results_in)
+
+            sim_results = pareto.SimulationResults()
+            sim_results.read_simulation_results(fname_sims=fname_results_out)
+            sim_results.calculate_pareto_set()
+            sim_results.calculate_culled_set(self._cull_type,
+                                             self._cull_param)
+            sim_results.write_pareto_set(fname_pareto_out)
+            sim_results.write_culled_set(fname_culled_out)
 
 class FileParameterSampler(PyPosmatEngine):
 
@@ -690,137 +790,6 @@ class FileParameterSampler(PyPosmatEngine):
     print("Simulations failed: {}".format(n_sim_failures))
     print("Total time required for simulations: {} s".format(total_time))
     # end of run()
-    
-class AnlParameterSampler(PyPosmatEngine):
-    def __init__(self, 
-               fname_config_pyposmat  = "pyposmat.config",
-               fname_config_potential = "pyposmat.potential",
-               fname_config_qoi       = "pyposmat.qoi",
-               is_read = True):
-        
-        PyPosmatEngine.__init__(self,
-                                fname_config_pyposmat,
-                                fname_config_potential,
-                                fname_config_qoi)
-        self.param_names = None
-        self.qoi_names = None
-        self.err_names = None
-        self.names = None
-        self.types = None
-        
-        self.fname_results = 'results.out'
-        self.fname_failed_params = None
-        
-        self.set_data_labels()        
-        
-        if os.path.exists(self.fname_results):
-            if os.path.isfile(self.fname_results):
-                os.remove(self.fname_results)
-
-    def set_data_labels(self):
-        
-        self.param_names = list(self.potential_parameter_list)
-        self.qoi_names = list(self.qoi_list)
-        self.err_names = ["{}_err".format(q) for q in self.qoi_names]
-
-        self.names = self.param_names + self.qoi_names + self.err_names
-        self.types = len(self.param_names)*['param'] + len(self.qoi_names)*['qoi'] + len(self.err_names)*['err']
-        
-    def evaluate_one_parameter_set(self, params):
-        self.evaluate_parameter_set(params)
-        try:
-            self.run_all_lammps_simulations()
-            self.calculate_qoi()
-            new_qoi_set = self.get_new_qoi_set()
-        except PyPosmatError:
-            self.n_sim_failures += 1
-            print("simulation failed")     
-
-        results_param = [params[p] for p in self.param_names]
-        results_qoi = [self.qoi[q]['est'] for q in self.qoi_names]
-        results_err = [self.error[q] for q in self.qoi_names]
-        results = list(results_param) + list(results_qoi) + list(results_err)
-      
-        return self.names, self.types, results
-        
-class MonteCarloParameterSampler(PyPosmatEngine):
-
-  def get_qoi_header(self):
-    str_out = ""
-    str_out += "sim_id "
-    for param in self.potential_parameter_list:
-      str_out += "{} ".format(param)
-    str_out += "| "
-    for qoi_key in self.qoi_list:
-      # str_out += "{} ".format(qoi_key)
-      str_out += "{}_abserr ".format(qoi_key)
-      # str_out += "{}_nabserr ".format(qoi_key)
-      # str_out += "{}_sqerr ".format(qoi_key)
-      # str_out += "{}_nsqerr ".format(qoi_key)
-    str_out += "\n"
-    return str_out
-
-  def get_new_parameter_set(self):
-    new_param_set = {}
-    i = 0
-    for param in self.potential_parameter_list:
-      a = self.potential_parameters[param][1]
-      b = self.potential_parameters[param][2]
-      new_param_set[param] = np.random.uniform(low = a, high = b)
-      i += 1
-    return new_param_set
-
-
-   
-  def run(self,n_simulations = 10, fname_results = 'results.out'):
-
-    #check to see if file exists and delete
-    if os.path.exists(fname_results):
-      if os.path.isfile(fname_results):
-        os.remove(fname_results)
-    
-    f = open(fname_results,'w')
-    f.write(self.get_qoi_header())
-
-    failures = 0
-    for i_simulation in range(n_simulations):
-      print('evaluating param_set_id:{}'.format(i_simulation))
-
-      is_good_sim = False
-      while not is_good_sim:
-        new_param_set = self.get_new_parameter_set()
-
-        # TODO: generalize this code
-        new_param_set['chrg_O'] = - new_param_set['chrg_Mg']
-
-        # if i_simulation not in [4048, 6533]:
-        #     break
-        # print(new_param_set)
-
-        self.evaluate_parameter_set(new_param_set)
-
-        try:
-          self.run_all_lammps_simulations()
-          self.calculate_qoi()
-          new_qoi_set = self.get_new_qoi_set()
- 
-          str_out = ""
-          str_out = "{} ".format(i_simulation)
-          for param in self.potential_parameter_list:
-            str_out += "{} ".format(new_param_set[param])
-          str_out += "| "
-
-          for qoi_result in new_qoi_set:
-            str_out += "{} ".format(qoi_result)
-          str_out += "\n"
-          f.write(str_out)
-          is_good_sim = True
-
-        except PyPosmatError:
-          print("simulation failed, trying new parameter set") 
-          failures += 1
-    f.close()
-    print("The number of failures was: " + str(failures))
 
 class PyPosmatConfigFile:
     def __init__(self,
@@ -840,7 +809,6 @@ class PyPosmatConfigFile:
 
         self._lmps_bin = None
         self._lmps_exe_script = None
-
 
         if is_read is True:
             self.read()
@@ -1179,7 +1147,9 @@ class PotentialConfigFile:
             return self.elements[pot_id]['charge']
           
 class QoiConfigFile:
-    def __init__(self, fname_config = "pyposmat.potential",is_read = True):
+    def __init__(self, 
+                 fname_config = "pyposmat.potential",
+                 is_read = True):
         self._fname_config = fname_config
         self._qoi_names = []
         self._qoi_info = None
