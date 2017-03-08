@@ -1147,15 +1147,32 @@ class PotentialConfigFile:
             return self.elements[pot_id]['charge']
           
 class QoiConfigFile:
+    """Class which processes the pyposmat.qoi file"""
     def __init__(self, 
-                 fname_config = "pyposmat.potential",
+                 fname_config = "pyposmat.qoi",
                  is_read = True):
+        """default constuctor
+
+        Args:
+            fname_config (str, optional): filename of the pyposmat.qoi file.
+                default is pyposmat.qoi
+            is_read (bool, optional): if set to true, it will read the
+                configuration file.  default is True.
+        """
         self._fname_config = fname_config
         self._qoi_names = []
         self._qoi_info = None
         if is_read == True:
             self.read()
-    
+
+    @property
+    def qoi_targets(self):
+        """:obj:`dict` of :obj:'float': dictionary where the key is the 
+        qoi name and the value"""
+        qoi_info = {}
+        for k,v in self._qoi_info.items():
+            qoi_info[k] = v['target']
+        return qoi_info
     @property
     def qoi_info(self):
         return self._qoi_info
@@ -1166,6 +1183,7 @@ class QoiConfigFile:
 
     @property
     def qoi_names(self):
+        """:obj:`list` of :obj:`str`: list of qoi names"""
         return self._qoi_names
 
     def read(self):
