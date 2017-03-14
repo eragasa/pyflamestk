@@ -37,7 +37,7 @@ param_dict['OO_C']     = 27.88
 start_time = time.time()
 
 # constructor
-mc_sampler = pyposmat.PyPosmatEngine2()
+mc_sampler = pyposmat.PyPosmatEngine()
 
 # evaluate parameter set
 names, types, values = mc_sampler.evaluate_parameter_set(param_dict)
