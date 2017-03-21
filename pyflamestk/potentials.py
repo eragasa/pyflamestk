@@ -8,7 +8,7 @@ class PyFlamesTkError(Exception):
     def __str__(self):
         return self.value
         
-class Potential:
+class Potential(object):
     """
     Class: Potential
     Author: Eugene J. Ragasa

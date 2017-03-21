@@ -1,23 +1,22 @@
-#!/usr/bin/env python
-import os
-import copy
-import sys, getopt
+# -*- coding: utf-8 -*-
+"""This module provides pareto calculation functions
+
+Eugene J. Ragasa, University of Florida, developed the original version
+of this code.  Dmitriy Morozov, Lawrence Berkeley Labs, provided speed ups for the
+Pareto versions of the code in Dec 2016.
+
+
+"""
+__author__ = "Eugene J. Ragasa"
+__copyright__ = "Copyright (C) 2016,2017"
+__license__ = "Simplified BSD License"
+__version__ = "1.0"
+
+# <----- imports
+import os,copy,sys, getopt
 import numpy as np
-import pyflamestk.pyposmat
-import matplotlib.pyplot as plt
-import matplotlib.mlab as mlab
 import scipy.stats
 
-# This file contains primarily pareto analysis code for pyposmat
-# analysis.
-# Developers:
-# Eugene J. Ragasa, University of Florida, developed the original version
-#     of this code.
-# Dmitriy Morozov, Lawrence Berkeley Labs, provided speed ups for the
-#     Pareto versions of the code in Dec 2016.
-
-
-    
 def pareto_frontier_2d(Xs, Ys, maxX=True, maxY=True):
     '''
     Method to take two equally-sized lists and return just the elements which
@@ -35,11 +34,11 @@ def pareto_frontier_2d(Xs, Ys, maxX=True, maxY=True):
     # Loop through the sorted list
     for pair in myList[1:]:
         if maxY: 
-            if pair[1] >= p_front[-1][1]: # Look for higher values of Y…
-                p_front.append(pair) # … and add them to the Pareto frontier
+            if pair[1] >= p_front[-1][1]: # Look for higher values of
+                p_front.append(pair) # and add them to the Pareto frontier
         else:
-            if pair[1] <= p_front[-1][1]: # Look for lower values of Y…
-                 p_front.append(pair) # … and add them to the Pareto frontier
+            if pair[1] <= p_front[-1][1]: # Look for lower values of
+                 p_front.append(pair) #  and add them to the Pareto frontier
     # Turn resulting pairs back into a list of Xs and Ys
     p_frontX = [pair[0] for pair in p_front]
     p_frontY = [pair[1] for pair in p_front]
@@ -108,7 +107,13 @@ def pareto(pts, indices = None, i = 0):
     #return pareto_merge(optimalLo, optimalHi, i, dim)
     
 class ParameterFileReader:
-    """
+    """ Reads a file consisting of parameters
+
+    This class expects a csv file the first line should have the name of all
+    the parameters, separated by commas.  The second line on should have the
+    value of each parameter, in the same order as the header line, also 
+    separated by commas.
+
     Args:
         fname_param_in (str): filename of the parameter file
         
@@ -128,15 +133,51 @@ class ParameterFileReader:
         for idx in range(1,n_lines):
             self.params.append([float(num) for num in self.lines[idx].split()])
 
-            
-class SimulationResults:
-    """
+class SimulationResults(object):
+    """this class processes the simulation results
   
     Args:
       n_simulations (int): number of simulations read from the output file
       qoi_type (str): supported qoi types are
           'abserr' - absolute error
     """
+
+    def __init__(self):
+        """default constructor"""
+        self._supported_qoi_err_types = ['abserr', 'sqerr']
+
+        # filenames    
+        self.fname_log_file = "pyposmat.log"
+        self.fname_sim_results = None
+        self.fname_pareto = None
+        self.fname_cull= None
+
+        # initialize variables [ATTRIBUTES]
+        self._qoi_err_type = 'abserr' # qoi error type
+        self._qoi_err_req = None
+        self._n_sims = None # numer of simulations
+        self._names = None # names of the
+        self._types = None
+        self._param_names = [] # array of parameter names
+        self._qoi_names = [] # array of qoi names
+        self._err_names = []
+
+        # results
+        # set to None also indicates that calculations have not been done
+        self._pareto_set_ids = None          # indexed with self._results
+        self._results = None                 # numpy array of all simulation data
+        self._pareto = None                  # numpy array of the pareto set
+        self._cull = None                    # numpy array of the culled pareto set
+
+        self.performance_requirements = {}
+
+        # filename handles
+        self._file_log = None
+        self._log_format = None
+        self._open_log_file()
+ 
+    def __del__(self):
+        self._close_log_file()
 
     @property
     def n_simulations(self): 
@@ -147,18 +188,27 @@ class SimulationResults:
         self._n_sims = nsims
 
     @property
-    def ref_qoi(self): return self._qoi_ref
+    def qoi_ref(self):
+        return self._qoi_ref
 
-    @ref_qoi.setter
+    @qoi_ref.setter
     def qoi_ref(self, dict_qoi):
         assert type(dict_qoi),dict
         self._qoi_ref = dict_qoi
-        
-    @property
-    def names(self): return self._names
 
     @property
-    def types(self): return self._types
+    def qoi_err_req(self):
+        return self._perf_req
+
+    @property
+    def names(self):
+        """list of str: contains a list of all string in the column"""
+        return self._names
+
+    @property
+    def types(self):
+        """list of str: contains either 'param','qoi','err'"""
+        return self._types
 
     @property
     def qoi_err_type(self):
@@ -180,6 +230,10 @@ class SimulationResults:
     def qoi_names(self):
         return self._qoi_names
 
+    @property
+    def err_names(self):
+        return self._err_names
+
     @qoi_names.setter
     def qoi_names(self, qnames):
         self._qoi_names = qnames
@@ -191,52 +245,52 @@ class SimulationResults:
     @parameter_names.setter
     def parameter_names(self, pnames):
         self._param_names = pnames
+    
+    @property
+    def results(self):
+        """numpy.array: numpy array of results"""
+        return self._results
+
+    @property
+    def pareto(self): 
+        """numpy.array: numpy array of pareto results"""
+        return self._pareto
+ 
+    @property
+    def culled(self): 
+        """numpy.array: numpy array of pareto results"""
+        return self._culled
+
+    # <--- some functions here to read configuration files
+    def read_configuration_files(self,
+                                 pyposmat_config = 'pyposmat.config',
+                                 pyposmat_potential = 'pyposmat.potential',
+                                 pyposmat_qoi = 'pyposmat.qoi'):
+        """" reads the pyposmat configuration files
         
-    @property
-    def results(self): return self._results
+        Args:
+            pyposmat_config (str,optional): defaults to pyposmat.config
+            pyposmat_potential (str,optional): defaults to pyposmat.potential
+            pyposmat_qoi (str,optional): defaults to pyposmat.qoi
+      
+        """
+        self._read_config_pyposmat(pyposmat_config)
+        self._read_config_potential(pyposmat_potential)
+        self._read_config_qoi(pyposmat_qoi)
 
-    @property
-    def pareto(self): return self._pareto
+    def _read_config_pyposmat(self,fname):
+        self._config_pyposmat = pyposmat.PyPosmatConfigFile(fname,
+                                                            True)
 
-    @property
-    def culled(self): return self._culled
+    def _read_config_potential(self,fname):
+        self._config_potential = pyposmat.PotentialConfigFile(fname,
+                                                              True)
 
-    def __init__(self):
-        self._supported_qoi_err_types = ['abserr', 'sqerr']
-
-        # filenames    
-        self.fname_log_file = "pyposmat.log"
-        self.fname_sim_results = None
-        self.fname_pareto = None
-        self.fname_cull= None
-
-        # initialize variables [ATTRIBUTES]
-        self._qoi_err_type = 'abserr' # qoi error type
-        self._n_sims = None # numer of simulations
-        self._names = None
-        self._types = None
-        self._param_names = [] # array of parameter names
-        self._qoi_names = [] # array of qoi names
-        self._err_names = []
-
-        # results
-        # set to None also indicates that calculations have not been done
-        self._pareto_set_ids = None          # indexed with self._results
-        self._results = None                 # numpy array of all simulation data
-        self._pareto = None                  # numpy array of the pareto set
-        self._cull = None                    # numpy array of the culled pareto set
-
-        self.performance_requirements = {}
-
-        # filename handles
-        self._file_log = None
-        self._log_format = None
-        self._open_log_file()
-
-    def __del__(self):
-        self._close_log_file()
-
-    # SOME FUNCTIONS HERE TO DEAL WITH APPLICATION LOGGING.          
+    def _read_config_qoi(self,fname):
+        self._config_qoi = pyposmat.QoiConfigFile(fname,
+                                                  True)
+        self._qoi_ref = self._config_qoi.qoi_ref_vals
+        # SOME FUNCTIONS HERE TO DEAL WITH APPLICATION LOGGING.          
     def _open_log_file(self):
         if self._file_log is None:
             self._file_log = open(self.fname_log_file,'w')
@@ -253,17 +307,12 @@ class SimulationResults:
             print(msg)
     
     def write_pareto_set(self,fname_out='pareto.out'):
-        """
-        Write the pareto set to file.
+        """Write the pareto set to file.
 
         This function prints the calculated pareto set to file.
 
-        Parameters:
-        fname_out - the filename (str) (default: pareto.out)
-
-        Returns:
-        None
-
+        Args:
+            fname_out(str) - the filename (default: pareto.out)
         """
 
         # create header
@@ -350,7 +399,7 @@ class SimulationResults:
         elif file_type == 'pareto':
             # check to see if pareto header line is the same as the pareto line
             if self._names == [n.strip() for n in lines_in[0].strip().split(',')]:
-                self._log("pareto names header file matches result file")
+                pass
             else:
                 if self._names is None:
                     errmsg = "The results file must be read before the pareto file"
@@ -361,7 +410,7 @@ class SimulationResults:
 
             # check to see if pareto types header line is the same as the pareto line
             if self._types == [t.strip() for t in lines_in[1].strip().split(',')]:
-                self._log("pareto types header matches results types header")
+                pass
             else:
                 if self._types is None:
                     errmsg = "The results file must be read before the pareto file"
@@ -389,6 +438,8 @@ class SimulationResults:
             self._results = np.array(results)
         elif file_type == 'pareto':
             self._pareto = np.array(results)
+        elif file_type == 'culled':
+            self._culled = np.array(results)
 
     def read_simulation_results(self,
                                 fname_sims, 
@@ -398,10 +449,10 @@ class SimulationResults:
         read simulations results from a file into a memory.
       
         Args:
-        fname_sims (str): the filename containing the simulation results from
-          LAMMPS simulations
-        fname_pareto (str): the filename containing the pareto set results
-        fname_cull (str): the filename contain culled pareto set results
+            fname_sims (str): the filename containing the simulation results from
+                LAMMPS simulations
+            fname_pareto (str): the filename containing the pareto set results
+            fname_cull (str): the filename contain culled pareto set results
         """
       
         self.fname_sims = fname_sims
@@ -420,16 +471,15 @@ class SimulationResults:
           
         if fname_cull is not None:
             self.fname_cull = fname_cull
-            self.__read_file(fname_cull, 'cull')
+            self.__read_file(fname_cull, 'culled')
           
     def _create_dataset_for_pareto_analysis(self, err_names=None):
-        """
-        Creates a dataset for pareto analysis
+        """iCreates a dataset for pareto analysis
 
         This method creates a dataset necessary for pareto analysis
 
         Arguments:
-        err_names - a list of strings containing the identifiers for the error
+        err_names (list of str): - contains the identifiers for the error
         """
 
         print("creating dataset for pareto analysis")
@@ -495,7 +545,48 @@ class SimulationResults:
     #--------------------------------------------------------------------------
     # methods for calculating the culled pareto set
     #--------------------------------------------------------------------------
-    def calculate_culled_set(self,cull_type="percentile",pct=80.):
+    def calculate_culled_set(self,
+                             cull_type="percentile",pct=80.,
+                             qoi_err_threshold = None):
+        """
+        Arguments:
+        cull_type - supports the different culling of the pareto set by 
+            different mechanisms.  The current mechanisms are 'percentile'
+            and 'pct_error'
+        pct - is a float variable.
+        qoi_err_threshold - the error threshold acceptable.
+
+        Notes:
+            If qoi_error_threshold is set, the parameters cull_type and
+            pct are ignored.
+
+        Returns:
+            Nothing
+
+        Raises:
+            RuntimeError: If any key in qoierr_threshold is not contained
+                in the attribute error_names, it will check to see if
+                the key value is contained in qoi_names and attempt to 
+                change the key value.  If this is not successful, then
+                a RuntimeError will be returned.
+        """
+
+        if qoi_err_threshold is not None:
+             for k,v in qoi_err_threshold.items():
+                 if k.endsin('.err'):
+                     if k in self.error_names:
+                         self.add_performance_constraint(k,v)
+                     else:
+                         raise RuntimeError('unknown performance constraint')
+                 else:
+                     if k in self.qoi_names:
+                         new_k = "{}.err".format(k)
+                         self.add_performance_constraint(new_k,v)
+                     else:
+                         raise RuntimeError('unknown performance constraint')
+             self.apply_performance_constraints()
+             return
+
         if cull_type == "percentile":
             self._calculate_culled_set_by_percentile(pct)
         elif cull_type == "pct_error":
