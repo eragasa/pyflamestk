@@ -1,0 +1,4 @@
+pot_name,elements,chrg_Mg,chrg_O,MgMg_A,MgMg_rho,MgMg_C,MgO_A,MgO_rho,MgO_C,OO_A,OO_rho,OO_C
+pot_name,elements,param,param,param,param,param,param,param,param,param,param,param
+Lewis77_MgO,Mg O,2.0,-2.0,0.0,0.5,0.0,821.6,0.3242,0.0,22764.0,0.149,27.88
+Lewis78_MgO,Mg O,2.0,-2.0,0.0,0.5,0.0,821.6,0.3242,0.0,22764.0,0.149,27.88
