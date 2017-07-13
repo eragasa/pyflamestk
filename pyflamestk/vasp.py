@@ -113,9 +113,9 @@ class Incar(object):
                 str_out += 'ISIF = 3 # relax everything'
             elif self.isif == '2':
                 str_out += 'ISIF = 2 # relax atomic positions'
-            if self.ibrion == '2'
+            if self.ibrion == '2':
                 str_out += 'IBRION = 2 # cg relaxation'
-            elif self.ibrion == '3'
+            elif self.ibrion == '3':
                 str_out += 'IBRION = 1 # RMM-DSS'
             str_out += 'POTIM = {}'.format(self.potim)
             str_out += 'NSW = {}'.format(self.nsw)

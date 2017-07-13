@@ -54,7 +54,92 @@ class Potential(object):
             return 'oxygen'
         else:
             raise ValueError('element {} not in database'.format(element))
- 
+
+class CutoffFunction(object):
+    def __init__(self):
+        pass
+
+def cutoff_shifted_force(r,v,rcut):
+    """
+
+        r - numpy.array of distances
+        v - numpy.array of energies
+    Returns:
+        sv - (numpy.array) force shifted potential
+    """
+    return sv
+
+def cutoff_shifted_energy(r,v,rcut):
+    """
+
+        r - numpy.array of distances
+        v - numpy.array of energies
+        rc - (float) cutoff distance
+    Returns:
+        sv - (numpy.array) energy shifted potential
+    """
+    return sv
+
+class ShiftedForceCutoff(CutoffFunction):
+    def eval(self, r):
+        pass
+
+def func_cutoff(r,rcut,h):
+    x = (r - rcut)/h
+    phi = (x**4)/(1+x**4)
+    # get index values where r > rcut
+    r_gt_rcut = np.where(r >= rcut)
+    phi[r_gt_rcut] = np.zeros(len(r_gt_rcut))
+    return phi
+
+
+
+class EamPotential(Potential):
+    def __init__(self,symbols):
+        Potential.__init__(self,symbols)
+        self._pot_type = 'eam'
+        self.param_dict = None
+        self._param_names = None
+
+        self._pair_function = None
+        self._density_function = None
+        self._embedding_function = None
+
+    @property
+    def pair_function(self):
+        return self._pair_function
+
+    @pair_function.setter
+    def pair_function(self,func):
+        self._pair_function = func
+
+    @property
+    def density_function(self):
+        return self._density_function
+
+    @density_function.setter
+    def density_function(self, func):
+        self._density_function = func
+
+    @property
+    def embedding_function(self):
+        return self._embedding_function
+
+    @embedding_function.setter
+    def embedding_function(self, func):
+        self._embedding_function = func
+
+    @property
+    def parameter_names(self):
+        self._determine_parameter_names()
+        return self._param_names
+
+    def _determine_parameter_names(self):
+        self._param_names  = ['p.{}'.format(v) for v in self.pair_function.parameter_names]
+        self._param_names += ['d.{}'.format(v) for v in self.density_function.parameter_names]
+        self._param_names += ['e.{}'.format(v) for v in self.embedding_function.parameter_names]
+
+    #def make_setfl_file(self):
 class BuckinghamPotential(Potential):
     def __init__(self,symbols):
         Potential.__init__(self,symbols)
@@ -89,53 +174,6 @@ class BuckinghamPotential(Potential):
                     self._param_names.append("{}{}_rho".format(s_i,s_j))
                     self._param_names.append("{}{}_C".format(s_i,s_j))
 
-class EamPotential(Potential):
-    def __init__(self,symbols):
-        Potential.__init__(self,symbols)
-        self._pot_type = 'eam'
-        self.param_dict = None
-        self._param_names = None
-
-        # functions are implemented as dictionaries
-        self._embedding_function = None
-        self._electron_density_function = None
-        self._pair_potential = None
-
-    @property
-    def parameter_names(self):
-        self._determine_parameter_names()
-        return self._param_names
-
-    def set_embedding_function(self,name_embed):
-        if name_embed == 'embed_universal':
-            self._embedding_function = \
-                    UniversalEmbeddingFunction(self.symbols)
-        elif name_embed == 'embed_bjs':
-            self._embedding_function = \
-                    BanejeraSmithEmbeddingFunction(self.symbols)
-
-    def set_pair_potential(self,name_pair):
-        if name_pair == 'pair_morse':
-            self._pair_potential = \
-                    MorsePotential(self.symbols)
-
-    def set_density_function(self,name_dens):
-        if name_dens == 'elec_dens_exp':
-            self._electron_density_function = \
-                    ExponentialDensityFunction(self.symbols)
-
-    def determine_parameter_names(self):
-        self._determine_parameter_names()
-    def _determine_parameter_names(self):
-        self._param_names = []
-        embed_params = self._embedding_function.parameter_names
-        dens_params = self._electron_density_function.parameter_names
-        pair_params = self._pair_potential.parameter_names
-        
-        self._param_names += ['pair.{}'.format(p) for p in pair_params]
-        self._param_names += ['dens.{}'.format(p) for p in dens_params]
-        self._param_names += ['embed.{}'.format(p) for p in embed_params]
-
 class EamElectronDensityFunction(Potential):
     pass
 
@@ -165,7 +203,7 @@ class ExponentialDensityFunction(EamElectronDensityFunction):
             self._param_names.append('{}_beta'.format(s))
             self._param_names.append('{}_r0'.format(s))
 
-    def eval(r,symbol,params):
+    def evaluate(self,r,symbol,params,rcut=0,h=1):
         err_msg = "cannot find {} parameter for {}"
 
         rho0 = None
@@ -173,7 +211,7 @@ class ExponentialDensityFunction(EamElectronDensityFunction):
         r0 = None
 
         if '{}_rho0'.format(symbol) in self._param_names:
-            rhoe = params['{}_rho0'.format(symbol)]
+            rho0 = params['{}_rho0'.format(symbol)]
         else:
             str_out = err_msg.format(err_msg.format('rho0',symbol))
             raise ValueError(str_out)
@@ -186,13 +224,17 @@ class ExponentialDensityFunction(EamElectronDensityFunction):
 
         
         if '{}_r0'.format(symbol) in self._param_names:
-            beta = params['{}_r0'.format(symbol)]
+            r0 = params['{}_r0'.format(symbol)]
         else:
             str_out = err_msg.format(err_msg.format('r0',symbol))
             raise ValueError(str_out)
 
         val = rho0 * np.exp(-beta*(r/r0-1))
 
+        if rcut != 0:
+            val = val * func_cutoff(r,rcut,h)
+
+        return val
 class MorsePotential(Potential):
     def __init__(self,symbols):
         Potential.__init__(self,symbols)
@@ -213,7 +255,13 @@ class MorsePotential(Potential):
         for v in self._param_names:
             self.param_dict[v] = None
 
-    def evaluate(self,r,pair,params):
+    def evaluate(self,r,pair,params, rcut=0, h=1.):
+        """
+        Args:
+
+            rcut(float) - the cutoff function.  If set to 0, then no cutoff
+        function is applied.
+        """
         err_msg = "MorsePotential cannot find {} parameter for {},{} pair"
 
         # free_params = De, a, re
@@ -247,6 +295,10 @@ class MorsePotential(Potential):
 
         val = D0 * ((1 - np.exp(-a*(r-r0)))**2 -1)
         #val = D0 * (1 - np.exp(-a*(r-r0)))**2
+
+        if rcut != 0:
+            print('using rcut')
+            val = val * func_cutoff(r,rcut,h)
 
         return val
 

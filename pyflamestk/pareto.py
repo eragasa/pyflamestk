@@ -144,7 +144,7 @@ class SimulationResults(object):
 
     def __init__(self):
         """default constructor"""
-        self._supported_qoi_err_types = ['abserr', 'sqerr']
+        self._supported_qoi_err_types = ['err','abserr', 'sqerr']
 
         # filenames    
         self.fname_log_file = "pyposmat.log"
@@ -169,6 +169,10 @@ class SimulationResults(object):
         self._pareto = None                  # numpy array of the pareto set
         self._cull = None                    # numpy array of the culled pareto set
 
+        # we could save a lot of memory here by just storing the
+        # ids of the pareto sets.
+        self._pareto_id = None # todo
+        self._culled_id = None # todo
         self.performance_requirements = {}
 
         # filename handles
@@ -290,7 +294,8 @@ class SimulationResults(object):
         self._config_qoi = pyposmat.QoiConfigFile(fname,
                                                   True)
         self._qoi_ref = self._config_qoi.qoi_ref_vals
-        # SOME FUNCTIONS HERE TO DEAL WITH APPLICATION LOGGING.          
+
+    # SOME FUNCTIONS HERE TO DEAL WITH APPLICATION LOGGING.          
     def _open_log_file(self):
         if self._file_log is None:
             self._file_log = open(self.fname_log_file,'w')

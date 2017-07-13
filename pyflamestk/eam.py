@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.constants as spc
-import pyflamestk.potentials
-
+# import pyflamestk.potentials
+#import pyflamestk.tableofelements as toe
 class EamCurveFitter:
   def __init__(self, element_names):
 
@@ -29,8 +29,153 @@ class EamCurveFitter:
         print('pair_potential: p_{}{}'.format(el_i,el_j))
         self.pair_potentials['{}{}'.format(el_i,el_j)] = []
 
+class EamFile(object):
+    """
 
-class EamFileWriter:
+    Ref:
+        https://sites.google.com/a/ncsu.edu/cjobrien/tutorials-and-guides/eam
+        http://www.ctcms.nist.gov/potentials/
+        http://lammps.sandia.gov/doc/pair_eam.html
+    """
+    def __init__(self):
+        self._comments = []
+        self._comments.append("file automatically written by pyposmat")
+        self._comments.append("")
+        self._comments.append("")
+
+        self._title = None
+        self._elist = None
+        self._elements = None
+        self._fname = None
+
+        self._r = None
+        self._embed = {}
+        self._pair = {}
+        self._dens = {}
+
+        self._Nrho = None
+        self._drho = None
+        self._Nr = 500
+        self._dr = 500
+
+        self._rcut_g = None
+
+    @property
+    def comments(self):
+        return self._comments
+
+    @comments.setter
+    def comments(self, comments):
+        if len(comments) <= 3:
+            for i,v in enumerate(comments):
+                self._comments[i] = v.strip()
+        else:
+            raise Exception("comments must have less than three items")
+
+    @property
+    def title(self):
+        return self._title
+
+    @property
+    def element_list(self):
+        return self._elist
+
+    @property
+    def filename(self):
+        return self._fname
+
+    @property
+    def embed(self):
+        return self._embed
+
+    @property
+    def pair(self):
+        return self._pair
+
+    @property
+    def dens(self):
+        return self._dens
+
+    @property
+    def Nrho(self):
+        return self._Nrho
+
+    @Nrho.setter
+    def Nrho(self, Nrho):
+        self._Nrho = Nrho
+
+    @property
+    def drho(self):
+        return self._drho
+
+    @drho.setter
+    def drho(self, drho):
+        self._drho = drho
+
+    @property
+    def Nr(self):
+        return self._Nr
+
+    @Nr.setter
+    def Nr(self, Nr):
+        self._Nr = Nr
+
+    @property
+    def rcut_global(self):
+        return self._rcut_g
+
+    @rcut_global.setter
+    def rcut_global(self, rcut_g):
+        self._rcut_g = rcut_g
+
+    def write(self,filetype = 'setfl'):
+        if filetype == 'setfl':
+            self._write_setfl()
+
+    def _write_setfl(self):
+        self.file = open(self._fname, 'w')
+        self._write_eam_head()
+        self._write_singleeam()
+        self._write_paiream()
+        self.file.close()
+
+    def _write_eam_head(self):
+        for v in self._comments:
+            self.file.write(v+"\n")
+
+        # write number of atoms
+        n_elements = len(self.elist)
+        line = '    {}'.format(n_elements)
+        for s in self.elist:
+            line += (' {0:s}'.format(s))
+        line += '\n'
+        self.file.write(line)
+        
+        # 
+        self.file.write('{0:5d}{1:24.16e}{2:5d}{3:24.16e}{4:24.16f}\n'.format(\
+                             self.Nrho, self.drho,
+                             self.Nr,   self.dr,
+                             self.globalcutoff))
+
+    def _write_atomic_section(self):
+        for el in self.elist:
+            an = toe.get_atomic_number(el)
+            am = toe.get_atomic_mass(el)
+            lc = toe.get_lattice_constant(el)
+            lt = toe.get_lattice_type(el)
+            line = ("{}{}{}{}\n".format(an,am,lc,lt))
+            self._write_embed_func('el')
+            self._write_dens_func('el')
+    
+    def _write_potential_section(self):
+        N_el = len(self.elist)
+        for i_el in range(N_el):
+            for j_el in range(N_el):
+                if i_el <= j_el:
+                    self._write_potential_func('{}{}'.format(self._elist[i_el],
+                                                             self._elist[j_el]))
+
+class EamFileWriter(object):
     # Uses functions developed by O'Brien and Foiles
     def __init__(self, title, elements, filename, Nrho,drho,Nr,dr):
         self.comment1 = "file automatically written by pyposmat\n"
