@@ -1,5 +1,20 @@
-The problem of getting an error:
+This directory contains the necessary files to do a initial simulation for MgO
+for a variety of different properties.
 
-[warn] kq_init: detected broken kqueue; not using.: No such file or directory
+There are two scripts:
+- runsimulation.sh, runs the simulations by setting correct environmental
+        variables and running the python script.  buckingham_pareto.py
 
+       exports the PYTHONPATH using a relative path to the pyflamestk module
+- cleanup.sh, removes the results of the previous simulation
+
+There is one python script
+- buckingham_pareto.py, which requires the pyflamestk module
+
+There are several configuration files:
+- pyposmat.config, contains configuration of the python script 
+         buckingham_pareto.
+- pyposmat.qoi, contains configuration of material properties
+- pyposmat.potential, contains configuration information for the buckingham 
+         potential
 
