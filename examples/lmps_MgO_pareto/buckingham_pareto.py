@@ -33,7 +33,7 @@ n_simulations = 100
 n_seed = None
 is_restart = True
 start_time = time.time()
-mc_sampler = pyposmat.PyPosmatEngine2(is_restart = is_restart, random_seed = n_seed)
+mc_sampler = pyposmat.PyPosmatEngine(is_restart = is_restart, random_seed = n_seed)
 mc_sampler.sampler_type = 'uniform'
 mc_sampler.sample_parameter_space(n_simulations)
 
