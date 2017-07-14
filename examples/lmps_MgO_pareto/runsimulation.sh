@@ -9,4 +9,5 @@ echo The PYTHONPATH is $PYTHONPATH
 # this comment suppresses the error
 export EVENT_NOKQUEUE=1
 
+bash cleanup.sh
 python buckingham_pareto.py 

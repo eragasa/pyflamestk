@@ -18,3 +18,7 @@ There are several configuration files:
 - pyposmat.potential, contains configuration information for the buckingham 
          potential
 
+TO RUN SIMULATIONS:
+- all previous existing simulations should be deleted, this package has some
+limited ability to recover previous simulations but it isn't robust at this
+time, the script cleanup.sh should cleanup results from previous simulations
