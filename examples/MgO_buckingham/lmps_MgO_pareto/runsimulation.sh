@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PYTHONPATH=$(cd ../../;pwd)
+export PYTHONPATH=$(cd ../../../;pwd)
 echo The PYTHONPATH is $PYTHONPATH
 
 # tmux appears to be broken due to the brew install process on OSX
