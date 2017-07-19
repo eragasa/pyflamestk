@@ -55,6 +55,7 @@ class Potential(object):
         else:
             raise ValueError('element {} not in database'.format(element))
 
+
 class CutoffFunction(object):
     def __init__(self):
         pass

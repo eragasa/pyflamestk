@@ -439,6 +439,10 @@ class PyPosmatEngine(object):
             self._log('\tbuckingham_potential')
             symbols = self._config_potential.symbols
             self._potential = lammps.BuckinghamPotential(symbols)
+        elif self._config_potential.potential_type == 'tersoff':
+            self._log('\ttersoff potential')
+            symbols = self._config_potential.symbols
+            self._potential = lammps.TersoffPotential(symbols)
         else:
             raise ValueError
         self._potential.symbols = self._config_potential.symbols
