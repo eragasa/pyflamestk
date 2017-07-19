@@ -1,0 +1,3 @@
+This directory contains scripts to do a pareto analysis of parameterizations
+from Monte Carlo simulations.  This directory is used the base directory to
+check if everything is working
