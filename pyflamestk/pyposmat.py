@@ -444,7 +444,9 @@ class PyPosmatEngine(object):
             symbols = self._config_potential.symbols
             self._potential = lammps.TersoffPotential(symbols)
         else:
-            raise ValueError
+            err_msg = 'potential_type is not supported. {}'
+            err_msg = err_msg.format(self._config_potential.potential_type)
+            raise ValueError(err_msg)
         self._potential.symbols = self._config_potential.symbols
         self._log('\tsymbols:' + ','.join(self._potential.symbols)) 
         self._param_names = self._potential.parameter_names
@@ -1749,8 +1751,12 @@ class PotentialConfigFile:
                     self._set_potential_charge_param(params)
                 elif keyword == 'potential_pair_type':
                     self._set_potential_pair_type(params)
+                elif keyword == 'potential_3body_type':
+                    self._set_potential_3body_type(params)
                 elif keyword == 'potential_pair_param':
-                     self._set_potential_pair_param(params)
+                    self._set_potential_pair_param(params)
+                elif keyword == 'potential_3body_type':
+                    self._set_potential_3body_param(params)
 
     def _set_potential_charge_param(self,params):
         params = [p.strip() for p in params]
@@ -1768,6 +1774,20 @@ class PotentialConfigFile:
         p_type = params[3]
         p_info = [params[i] for i in range(4,len(params))]
 
+        self._set_param(p_name,p_type,p_info)
+
+    def _set_potential_3body_param(self,params):
+        params = [p.strip() for p in params]
+        element1 = params[0]
+        element2 = params[1]
+        element3 = params[2]
+        param_name = params[3]
+        p_name = '{}{}{}_{}'.format(element1,
+                                    element2,
+                                    element3,
+                                    param_name)
+        p_type = params[4]
+        p_info = [params[i] for i in range(5,len(params))]
         self._set_param(p_name,p_type,p_info)
 
     def _set_param(self,p_name,p_type,p_info):
@@ -1797,6 +1817,16 @@ class PotentialConfigFile:
         self._pair_type[pair_str] = {}
         self._pair_type[pair_str]['type'] = pair_type
         self._pair_type[pair_str]['param'] = {}
+
+    def _set_potential_3body_type(self,params):
+        element1 = params[0].strip()
+        element2 = params[1].strip()
+        element3 = params[2].strip()
+        pot_type = params[3].strip()
+        str_3body = "{}{}{}".format(element1,element2,element3)
+        self._pair_type[str_3body] = {}
+        self._pair_type[str_3body]['type'] = pot_type
+        self._pair_type[str_3body]['param'] = {}
 
     def get_param_list(self):
         self.param_list = []
