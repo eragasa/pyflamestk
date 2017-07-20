@@ -1,5 +1,5 @@
 #!/bin/bash
 
-PYTHONPATH=$(cd ../../;pwd)
+export PYTHONPATH=$(cd ../../;pwd)
 
 python buckingham_iterate.py
