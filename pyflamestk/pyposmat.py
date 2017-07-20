@@ -1210,17 +1210,18 @@ class SimulationResults(object):
     def calculate_culled_set(self,
                              cull_type="percentile",pct=80.,
                              qoi_err_threshold = None):
-        """
-        Arguments:
-        cull_type - supports the different culling of the pareto set by 
-            different mechanisms.  The current mechanisms are 'percentile'
-            and 'pct_error'
-        pct - is a float variable.
-        qoi_err_threshold - the error threshold acceptable.
+        """calculates the culled set
+        
+        This method applies applies performance thresholds upon the simulation.
+        If qoi_error_threshold is set, the parameters cull_type and pct are 
+        ignored.
 
-        Notes:
-            If qoi_error_threshold is set, the parameters cull_type and
-            pct are ignored.
+        Args:
+            cull_type (str): supports the different culling of the pareto set by 
+                different mechanisms.  The current mechanisms are 'percentile'
+                and 'pct_error'
+            pct (float): is a float variable.
+            qoi_err_threshold: the error threshold acceptable.
 
         Returns:
             Nothing
@@ -1396,16 +1397,15 @@ class SimulationResults(object):
                                  axis=0)
 
     def get_data(self, name, ds_type, err_type = 'abserr'):
-        """
-        Arguments:
-       
-        name (str) - string of parameter or quantity of interest
-        ds_type (str) - string of which dataset we are taking the data from.
-          The ds_types which are supported are: all, pareto, pareto_culled
+        """get data
+
+        Args:
+            name (str): string of parameter or quantity of interest
+            ds_type (str): string of which dataset we are taking the data from.
+                The ds_types which are supported are: all, pareto, pareto_culled
           
         Returns:
-      
-        a numpy array of the data asked for
+            (numpy.array): a numpy array of the data asked for
         """
         idx  = self._names.index(name)
 
@@ -1579,6 +1579,7 @@ class PyPosmatConfigFile:
         if self._lmps_sim_info is None:
             self._lmps_sim_info = {}
         self._lmps_sim_info[sim_name] = sim_location
+
 
 class ConfigFile:
   def __init__(self, fname_config = "pyposmat.config",is_read = True):

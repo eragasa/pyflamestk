@@ -152,10 +152,12 @@ class Qoi:
 
     @property
     def qoi_name(self):
+        """str: name of the quantity of interest"""
         return self._qoi_name
 
     @property
     def qoi_type(self):
+        """str: type of qoi"""
         return self._qoi_type
 
     @property
@@ -173,6 +175,7 @@ class Qoi:
 
     @property
     def is_ready_to_calculate(self):
+        """bool: returns true if ready to calculate"""
         raise NotImplementedError
 
     def calculate_qoi(self):

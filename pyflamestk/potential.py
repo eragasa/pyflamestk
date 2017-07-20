@@ -61,21 +61,24 @@ class CutoffFunction(object):
         pass
 
 def cutoff_shifted_force(r,v,rcut):
+    """shift potential by force
+
+    Args:
+        r (numpy.array): array of distances
+        v (numpy.array): array of energies
+    Returns:
+        numpy.array: force shifted potential
     """
 
-        r - numpy.array of distances
-        v - numpy.array of energies
-    Returns:
-        sv - (numpy.array) force shifted potential
-    """
     return sv
 
 def cutoff_shifted_energy(r,v,rcut):
-    """
+    """shift potential by energy
 
-        r - numpy.array of distances
-        v - numpy.array of energies
-        rc - (float) cutoff distance
+    Args:
+        r (numpy.array): array of distances
+        v (numpy.array): array of energies
+        rc (float): cutoff distance
     Returns:
         sv - (numpy.array) energy shifted potential
     """

@@ -1,3 +1,7 @@
 This directory contains scripts to do a pareto analysis of parameterizations
 from Monte Carlo simulations.  This directory is used the base directory to
-check if everything is working
+check if everything is working.
+
+
+MgO_buckingham_post.  This directory contains post processing scripts.  These
+scripts are not appropriate to run on a headnode of a cluster.
