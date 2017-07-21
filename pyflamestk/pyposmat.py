@@ -687,115 +687,119 @@ class IterativeSampler(PyPosmatEngine):
             sim_results.write_culled_set(fname_culled_out)
 
 class FileParameterSampler(PyPosmatEngine):
+    """This file samples parameters from a parameter file."""
 
-  def get_qoi_header(self):
+    def get_qoi_header(self):
+        """returns the header string for the output file
 
-    str_out = ""
-    str_out += "sim_id "
-    for param in self.potential_parameter_list:
-      str_out += "{} ".format(param)
-    str_out += "| "
-    for qoi_key in self.qoi_list:
-      str_out += "{} ".format(qoi_key)
-      str_out += "{}_abserr ".format(qoi_key)
-      str_out += "{}_nabserr ".format(qoi_key)
-      str_out += "{}_sqerr ".format(qoi_key)
-      str_out += "{}_nsqerr ".format(qoi_key)
-    str_out += "\n"
-    print(str_out)
-    return str_out
+            Returns:
+                str: space separated string of labels for output
+        """
+        str_out = ""
+        str_out += "sim_id "
+        for param in self.potential_parameter_list:
+            str_out += "{} ".format(param)
+        str_out += "| "
+        for qoi_key in self.qoi_list:
+            str_out += "{} ".format(qoi_key)
+            str_out += "{}_abserr ".format(qoi_key)
+            str_out += "{}_nabserr ".format(qoi_key)
+            str_out += "{}_sqerr ".format(qoi_key)
+            str_out += "{}_nsqerr ".format(qoi_key)
+        str_out += "\n"
+        return str_out
 
-  def get_new_parameter_set(self,param_name_array,param_set):
-    new_param_set = {}
+    def get_new_parameter_set(self,param_name_array,param_set):
+        new_param_set = {}
 
-    for param in self.potential_parameter_list:
-      idx = param_name_array.index(param)
-      param_value = param_set[idx] 
-      new_param_set[param] = param_value
-    return new_param_set
+        for param in self.potential_parameter_list:
+            idx = param_name_array.index(param)
+            param_value = param_set[idx] 
+            new_param_set[param] = param_value
+        return new_param_set
 
-   
-  def run(self,fname_params = 'params.in', fname_results = 'results.out'):
+       
+    def run(self,fname_params = 'params.in', fname_results = 'results.out'):
 
-    # member variables initialization
-    self.fname_params = fname_params
-    self.fname_results = fname_results
-    self.params_lines = []
-    self.param_names  = []
-    self.params = []
+        # member variables initialization
+        self.fname_params = fname_params
+        self.fname_results = fname_results
+        self.params_lines = []
+        self.param_names  = []
+        self.params = []
 
-    # local variable initialziation
-    n_simulations = 0
-    n_sim_failures = 0
-    start_time = time.time()
-    end_time = time.time()
+        # local variable initialziation
+        n_simulations = 0
+        n_sim_failures = 0
+        start_time = time.time()
+        end_time = time.time()
 
-    #check to see if output file exists and delete
-    if os.path.exists(fname_results):
-      if os.path.isfile(fname_results):
-        os.remove(fname_results)
+        #check to see if output file exists and delete
+        if os.path.exists(fname_results):
+            if os.path.isfile(fname_results):
+                os.remove(fname_results)
 
-    #check to see if file exists and read into memory
-    if os.path.exists(self.fname_params):
-      if os.path.isfile(self.fname_params):
-        f = open(self.fname_params)
-        self.params_lines = f.readlines()
+        #check to see if file exists and read into memory
+        if os.path.exists(self.fname_params):
+            if os.path.isfile(self.fname_params):
+                f = open(self.fname_params)
+                self.params_lines = f.readlines()
+                f.close()
+
+        # get number of lines in file
+        n_lines = len(self.params_lines)
+        n_simulations = n_lines - 1
+
+        # read header line
+        self.param_names = self.params_lines[0].strip().split(' ')
+
+        # read the parameter values from file into memory
+        for idx in range(1,n_lines):
+            self.params.append([float(num) for num in self.params_lines[idx].split()])
+
+        # open output file      
+        f = open(self.fname_results,'w')
+        f.write(self.get_qoi_header())
+
+        # do simulations loop
+        for i_simulation in range(n_simulations):
+            print('evaluating param_set_id:{}'.format(i_simulation))
+
+            new_param_set = self.get_new_parameter_set(self.param_names,
+                                                       self.params[i_simulation])
+
+            self.evaluate_parameter_set(new_param_set)
+
+            try:
+                self.run_all_lammps_simulations()
+                self.calculate_qoi()
+                new_qoi_set = self.get_new_qoi_set()
+         
+                str_out = ""
+                str_out = "{} ".format(i_simulation)
+                for param in self.potential_parameter_list:
+                    str_out += "{} ".format(new_param_set[param])
+                str_out += "| "
+
+                for qoi_result in new_qoi_set:
+                  str_out += "{} ".format(qoi_result)
+                str_out += "\n"
+                f.write(str_out)
+
+            except PyPosmatError:
+                n_sim_failures += 1
+                print("simulation failed, skipping parameter set") 
+            # end simulations loop
+
         f.close()
 
-    # get number of lines in file
-    n_lines = len(self.params_lines)
-    n_simulations = n_lines - 1
-
-    # read header line
-    self.param_names = self.params_lines[0].strip().split(' ')
-
-    # read the parameter values from file into memory
-    for idx in range(1,n_lines):
-      self.params.append([float(num) for num in self.params_lines[idx].split()])
-
-    # open output file      
-    f = open(self.fname_results,'w')
-    f.write(self.get_qoi_header())
-
-    # do simulations loop
-    for i_simulation in range(n_simulations):
-      print('evaluating param_set_id:{}'.format(i_simulation))
-
-      new_param_set = self.get_new_parameter_set(self.param_names,
-                                                 self.params[i_simulation])
-
-      self.evaluate_parameter_set(new_param_set)
-
-      try:
-        self.run_all_lammps_simulations()
-        self.calculate_qoi()
-        new_qoi_set = self.get_new_qoi_set()
- 
-        str_out = ""
-        str_out = "{} ".format(i_simulation)
-        for param in self.potential_parameter_list:
-          str_out += "{} ".format(new_param_set[param])
-        str_out += "| "
-
-        for qoi_result in new_qoi_set:
-          str_out += "{} ".format(qoi_result)
-        str_out += "\n"
-        f.write(str_out)
-
-      except PyPosmatError:
-        n_sim_failures += 1
-        print("simulation failed, skipping parameter set") 
-    # end simulations loop
-
-    f.close()
-
-    end_time = time.time()
-    total_time = end_time - start_time
-    print("\n\n")
-    print("Simulations run: {}".format(n_simulations))
-    print("Simulations failed: {}".format(n_sim_failures))
-    print("Total time required for simulations: {} s".format(total_time))
-    # end of run()
+        end_time = time.time()
+        total_time = end_time - start_time
+        print("\n\n")
+        print("Simulations run: {}".format(n_simulations))
+        print("Simulations failed: {}".format(n_sim_failures))
+        print("Total time required for simulations: {} s".format(total_time))
+        # end of run()
 
 class SimulationResults(object):
     """this class processes the simulation results
@@ -866,12 +870,12 @@ class SimulationResults(object):
 
     @property
     def names(self):
-        """list of str: contains a list of all string in the column"""
+        """List of str: contains a list of all string in the column"""
         return self._names
 
     @property
     def types(self):
-        """list of str: contains either 'param','qoi','err'"""
+        """List of str: contains either 'param','qoi','err'"""
         return self._types
 
     @property
