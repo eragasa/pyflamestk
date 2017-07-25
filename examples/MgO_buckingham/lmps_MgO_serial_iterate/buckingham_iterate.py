@@ -24,8 +24,8 @@ Shell Variables:
 start_time = time.time()
 
 # --- simulation parameters ---
-n_simulations = 100
-n_iterations = 10
+n_simulations = 100 # number of simulation per iteration loop
+n_iterations = 10   # number of iteration loops
 
 # supported cull_types are: percentile, pct_error
 cull_type = 'percentile'
