@@ -1,0 +1,160 @@
+LAMMPS (10 Feb 2015)
+# ---- initialize simulations
+clear
+units metal
+dimension 3
+boundary p p p
+atom_style charge
+atom_modify map array
+# ---- create atoms
+read_data lammps.structure
+  triclinic box = (0 0 0) to (4.2565 4.2565 4.2565) with tilt (0 0 0)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  8 atoms
+# ---- define interatomic potential
+include potential.mod
+mass 1 24.305
+mass 2 15.999
+
+group magnesium type 1
+4 atoms in group magnesium
+group oxygen type 2
+4 atoms in group oxygen
+
+set group magnesium charge 2.1371937311693414
+  4 settings made for charge
+set group oxygen charge -2.1371937311693414
+  4 settings made for charge
+
+variable R_cut equal 10.0
+
+pair_style buck/coul/long ${R_cut}
+pair_style buck/coul/long 10
+pair_coeff 1 1 0.0 0.5 0.0 ${R_cut}
+pair_coeff 1 1 0.0 0.5 0.0 10
+pair_coeff 1 2 831.2251655175153 0.30799390650175645 0.0 ${R_cut}
+pair_coeff 1 2 831.2251655175153 0.30799390650175645 0.0 10
+pair_coeff 2 2 23138.612152302983 0.26365421131443306 64.82394130917247 ${R_cut}
+pair_coeff 2 2 23138.612152302983 0.26365421131443306 64.82394130917247 10
+
+kspace_style pppm 1.0e-5
+
+neighbor 1.0 bin
+neigh_modify every 1 delay 0 check yes
+
+# ---- define settings
+compute eng all pe/atom
+compute eatoms all reduce sum c_eng
+
+# ---- run minimization
+reset_timestep 0
+fix 1 all box/relax iso 0.0 vmax 0.001
+thermo 10
+thermo_style custom step pe lx ly lz xy xz yz press pxx pyy pzz pxy pxz pyz c_eatoms
+min_style cg
+# energy tolerance = 1e-25, force tolerance = 1e-25
+minimize 1e-25 1e-25 5000 10000
+PPPM initialization ...
+  G vector (1/distance) = 0.355363
+  grid = 8 8 8
+  stencil order = 5
+  estimated absolute RMS force accuracy = 6.00422e-05
+  estimated relative force accuracy = 4.1697e-06
+  using double precision FFTs
+  3d grid and FFT values/proc = 3375 512
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 11
+Memory usage per processor = 4.06549 Mbytes
+Step PotEng Lx Ly Lz Xy Xz Yz Press Pxx Pyy Pzz Pxy Pxz Pyz eatoms 
+       0   -192.28331       4.2565       4.2565       4.2565            0            0            0   -144267.86   -144267.86   -144267.86   -144267.86 -4.4572281e-10 -2.4134287e-10 -7.8421355e-11   -192.28331 
+      10    -192.4269     4.213935     4.213935     4.213935            0            0            0   -53943.737   -53943.737   -53943.737   -53943.737 -4.5864278e-10 -1.0299293e-10 -3.8132554e-10    -192.4269 
+      20   -192.44745     4.191317     4.191317     4.191317            0            0            0     3.008539     3.008539     3.008539     3.008539 -1.4832183e-11 1.7446513e-10 -5.4292023e-12   -192.44745 
+      21   -192.44745     4.191317     4.191317     4.191317            0            0            0     3.008539     3.008539     3.008539     3.008539 -1.4832183e-11 1.7446513e-10 -5.4292023e-12   -192.44745 
+Loop time of 0.0262692 on 1 procs for 21 steps with 8 atoms
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+          -192.2833148     -192.447446824     -192.447446824
+  Force two-norm initial, final = 20.8324 0.00089372
+  Force max component initial, final = 20.8324 0.000421231
+  Final line search alpha, max atom move = 0.015625 6.58173e-06
+  Iterations, force evaluations = 21 61
+
+Pair  time (%) = 0.00711226 (27.0745)
+Kspce time (%) = 0.005059 (19.2583)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.00096488 (3.67305)
+Outpt time (%) = 4.50611e-05 (0.171536)
+Other time (%) = 0.013088 (49.8226)
+
+Nlocal:    8 ave 8 max 8 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:    2189 ave 2189 max 2189 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:    2344 ave 2344 max 2344 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 2344
+Ave neighs/atom = 293
+Neighbor list builds = 0
+Dangerous builds = 0
+
+variable natoms equal "count(all)"
+variable tot_energy equal "c_eatoms"
+variable length_x equal "lx"
+variable length_y equal "ly"
+variable length_z equal "lz"
+variable tilt_xy equal "xy"
+variable tilt_xz equal "xz"
+variable tilt_yz equal "yz"
+variable tot_press equal "press"
+variable press_xx equal "pxx"
+variable press_yy equal "pyy"
+variable press_zz equal "pzz"
+variable press_xy equal "pxy"
+variable press_xz equal "pxz"
+variable press_yz equal "pyz"
+
+variable ecoh equal "pe/atoms"
+#variable ecoh equal "v_etotal/v_atoms"
+# --- output
+print "pyPosMat output section"
+pyPosMat output section
+print "tot_energy = ${tot_energy}"
+tot_energy = -192.4474468244
+print "num_atoms = ${natoms}"
+num_atoms = 8
+print "xx = ${length_x}"
+xx = 4.1913170243605
+print "yy = ${length_y}"
+yy = 4.1913170243605
+print "zz = ${length_z}"
+zz = 4.1913170243605
+print "xy = ${tilt_xy}"
+xy = 0
+print "xz = ${tilt_xz}"
+xz = 0
+print "yz = ${tilt_yz}"
+yz = 0
+print "tot_press = ${tot_press}"
+tot_press = 3.00853902089927
+print "pxx = ${press_xx}"
+pxx = 3.00853902066901
+print "pyy = ${press_yy}"
+pyy = 3.00853902065467
+print "pzz = ${press_zz}"
+pzz = 3.00853902137414
+print "pxy = ${press_xy}"
+pxy = -1.4832182667283e-11
+print "pxz = ${press_xz}"
+pxz = 1.74465132934344e-10
+print "pyz = ${press_yz}"
+pyz = -5.42920227018212e-12
+print "ecoh = ${ecoh}"
+ecoh = -24.0559308530499
+print "lammps_sim_done"
+lammps_sim_done
