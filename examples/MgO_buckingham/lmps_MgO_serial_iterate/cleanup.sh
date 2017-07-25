@@ -9,3 +9,7 @@ rm results*
 # remove generated files
 rm params.dat
 rm results.out
+
+rm pyposmat.log
+rm potential.mod
+rm pyposmat.out
