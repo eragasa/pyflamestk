@@ -7,6 +7,11 @@ pyflamestk is written in python3 using packages found in the Anaconda3 distribut
 
 I hope to fully document the system, including providing appropriate references for particular techniques.  However, this is fairly time-consuming so references will normally be provided inline.
 
+Release-readiness work is documented in
+[`docs/release-readiness.md`](docs/release-readiness.md). Generated calculator
+artifacts staged for operator-managed offline storage are described in
+[`OFFLINE_ARTIFACTS.md`](OFFLINE_ARTIFACTS.md).
+
 Interfaces to Major Packages:
 - VASP (calculator for DFT simulations)
 - LAMMPS (calculator for Molecular Dynamics Simulations)

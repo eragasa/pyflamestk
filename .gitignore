@@ -1,0 +1,41 @@
+# Operator-managed offline artifact staging
+.offline/
+
+# Editor and Python caches
+.DS_Store
+.spyderworkspace
+**/.spyderproject
+**/__pycache__/
+*.py[cod]
+
+# Calculator outputs and restricted inputs
+**/POTCAR
+**/WAVECAR
+**/CHG
+**/CHGCAR
+**/CONTCAR
+**/DOSCAR
+**/EIGENVAL
+**/IBZKPT
+**/OSZICAR
+**/OUTCAR
+**/PCDAT
+**/XDATCAR
+**/vasprun.xml
+**/log.lammps
+**/restart.*
+**/job.log
+
+# Generated optimization and scheduler results
+**/pyposmat.out
+**/pareto.out
+**/out.dat
+**/regress_lammps.out
+**/param_out.dat
+**/params.dat
+**/params_[0-9]*.dat
+**/sim_results*.dat
+**/results*.out
+**/._*
+**/*.o[0-9]*
+**/*.e[0-9]*
