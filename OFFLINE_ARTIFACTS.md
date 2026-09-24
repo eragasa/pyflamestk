@@ -49,11 +49,17 @@ sha256=b3c7f89ef88564a04ca1cb02bf85cb66c314452812cb4827db24a58dcc3c0e0a
 
 ## Restoration and verification
 
-Offline restoration is manual and explicit. Before using a staged file, verify
-its bytes against both `MANIFEST.tsv` and `OFFLINE_ARTIFACT_SHA256SUMS`. Do not
-silently copy offline artifacts back into a release, test, wheel, or source
-distribution. In particular, no repository release should redistribute a
-pseudopotential without separately established redistribution authority.
+The [offline artifact tool instructions](tools/README.md#recover-the-private-v01-artifact-collection)
+provide the exact recovery and optional Git-verification commands using
+bootstrap commit `0144b8c7c280c998ed209b4cd0587d23057e6508` or later. Recovery is
+manual and explicit, targets a new absent directory, and verifies the archive,
+manifest, member set, SHA-256 identities, and byte sizes before publishing the
+recovered tree. The documented command has completed a full round trip of all
+161 files from the private archive.
+
+Do not silently copy recovered artifacts back into a release, test, wheel, or
+source distribution. In particular, no repository release should redistribute
+a pseudopotential without separately established redistribution authority.
 
 Existing Git history remains unchanged and continues to identify earlier
 committed bytes. This boundary changes the maintained tip; it is not a history
