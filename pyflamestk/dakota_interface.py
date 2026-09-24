@@ -184,11 +184,11 @@ class Simulation:
             if (self.asv[key] & 4):
                 self.calculateHessians()
 
-   def postrun(self):
-       pass
+    def postrun(self):
+        pass
     
     def readYamlString(self, yaml_string):
-        dakota_in = yaml.load(yaml_string)
+        dakota_in = yaml.safe_load(yaml_string)
         self.eval_id       = dakota_in['eval_id']
         self.num_functions = dakota_in['num_functions']
         self.parameters    = dakota_in['variables']
@@ -282,15 +282,15 @@ class DakotaInterface:
         def _readParametersFile(self):
 
             # setup regular expressions for parameter/label matching
-            e = '-?(?:\\d+\\.?\\d*|\\.\\d+)[eEdD](?:\\+|-)?\\d+' # exponential notation
-            f = '-?\\d+\\.\\d*|-?\\.\\d+'                        # floating point
-            i = '-?\\d+'                                         # integer
+            e = r'-?(?:\d+\.?\d*|\.\d+)[eEdD](?:\+|-)?\d+' # exponential notation
+            f = r'-?\d+\.\d*|-?\.\d+'                        # floating point
+            i = r'-?\d+'                                         # integer
             value = e+'|'+f+'|'+i                                # numeric field
-            tag = '\\w+(?::\\w+)*'                               # text tag field
+            tag = r'\w+(?::\w+)*'                               # text tag field
             # regular expression for aprepro parameters format
-            aprepro_regex = re.compile('^\s*\{\s*(' + tag + ')\s*=\s*(' + value +')\s*\}$')
+            aprepro_regex = re.compile(r'^\s*\{\s*(' + tag + r')\s*=\s*(' + value + r')\s*\}$')
             # regular expression for standard parameters format
-            standard_regex = re.compile('^\s*(' + value +')\s+(' + tag + ')$')
+            standard_regex = re.compile(r'^\s*(' + value + r')\s+(' + tag + r')$')
 
             file_parameters = open(self.filename_parameters)
             self.parameter_dict = {}
@@ -366,7 +366,7 @@ class DakotaInterface:
                 dvv           = self.deriv_values_vectors,
                 ac            = self.active_components
                 )
-            self.yaml_out_str = yaml.dump(data, default_flow_style=False)
+            self.yaml_out_str = yaml.safe_dump(data, default_flow_style=False)
             file = open(self.yaml_out,'w')
             file.write(self.yaml_out_str)
             file.close()

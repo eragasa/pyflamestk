@@ -178,7 +178,9 @@ def _require_normalized_relative(path: PurePosixPath, field_name: str) -> None:
 
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(
-        description="Stage selected tracked artifacts for operator-managed offline storage."
+        description=(
+            "Stage selected tracked artifacts for operator-managed offline storage."
+        )
     )
     result.add_argument("--repository-root", type=Path, required=True)
     result.add_argument(

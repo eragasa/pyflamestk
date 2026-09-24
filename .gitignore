@@ -1,7 +1,11 @@
 # Operator-managed offline artifact staging
 .offline/
 
-# Editor and Python caches
+# Build, editor, and Python caches
+build/
+dist/
+*.egg-info/
+.venv/
 .DS_Store
 .spyderworkspace
 **/.spyderproject

@@ -12,6 +12,27 @@ Release-readiness work is documented in
 artifacts staged for operator-managed offline storage are described in
 [`OFFLINE_ARTIFACTS.md`](OFFLINE_ARTIFACTS.md).
 
+## Installation boundary
+
+PyFlamestk is an alpha research toolkit. The maintained wheel contains only the
+`pyflamestk` package; `dev/`, `examples/`, `tests/`, offline artifacts, and
+calculator output are not package content.
+
+Core numerical modules require NumPy and SciPy. Plotting and DAKOTA YAML support
+are explicit extras:
+
+```bash
+python -m pip install 'pyflamestk[plot]'
+python -m pip install 'pyflamestk[dakota]'
+```
+
+Installing or importing the package does not install, discover, configure, or
+run VASP, LAMMPS, GULP, DAKOTA, MPI, or a scheduler. Examples and development
+scripts are historical research material, not portable supported workflows;
+review their paths and process effects before any manual use. A source release
+makes no claim of calculation reproducibility, numerical verification, or
+scientific validation.
+
 Interfaces to Major Packages:
 - VASP (calculator for DFT simulations)
 - LAMMPS (calculator for Molecular Dynamics Simulations)

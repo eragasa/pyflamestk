@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.14"]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install verification tools
+        run: python -m pip install --upgrade build pip ruff
+
+      - name: Run bounded unit tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Compile maintained package and tools
+        run: python -m compileall -q pyflamestk tools
+
+      - name: Check release infrastructure style
+        run: |
+          ruff check setup.py tools tests/test_*.py
+          ruff format --check setup.py tools tests/test_*.py
+
+      - name: Build distributions
+        run: python -m build
+
+      - name: Verify distribution boundaries
+        run: |
+          python tools/verify_wheel.py dist/*.whl --repository-root .
+          python tools/verify_sdist.py dist/*.tar.gz
+
+      - name: Install wheel with optional dependencies
+        run: python -m pip install "$(find dist -name '*.whl' -print -quit)[all]"
+
+      - name: Import packaged modules outside the checkout
+        run: |
+          cd "${RUNNER_TEMP}"
+          python - <<'PY'
+          import importlib
+          import pkgutil
+
+          import pyflamestk
+
+          modules = sorted(
+              module.name
+              for module in pkgutil.iter_modules(
+                  pyflamestk.__path__,
+                  prefix="pyflamestk.",
+              )
+          )
+          for module in modules:
+              importlib.import_module(module)
+          print("imported", len(modules), "packaged modules")
+          PY

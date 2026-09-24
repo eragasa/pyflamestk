@@ -1,0 +1,20 @@
+include LICENSE
+include README.md
+include README.rst
+include pyproject.toml
+include setup.py
+include OFFLINE_ARTIFACTS.md
+include OFFLINE_ARTIFACT_SHA256SUMS
+recursive-include docs *.md
+recursive-include pyflamestk *.py
+include tests/test_*.py
+prune tests/base
+prune tests/potentials
+prune tests/pyposmat
+prune tests/vasp
+recursive-include tools *.md *.py
+prune .offline
+prune dev
+prune examples
+global-exclude *.py[cod]
+global-exclude __pycache__
