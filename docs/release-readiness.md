@@ -1,10 +1,12 @@
 # Release-readiness audit
 
-This audit is bounded to static inspection and an isolated wheel-build attempt
-of PyFlamestk commit `5b8368cc88d91bc56f9cc1c8a7fa8d9ea3d6b359` on branch
-`dev/release-readiness`. It does not import PyFlamestk, run tests, execute
-calculator scripts, submit jobs, evaluate source expressions, or establish
-numerical or scientific validity.
+The initial audit was bounded to static inspection and an isolated wheel-build
+attempt of PyFlamestk commit
+`5b8368cc88d91bc56f9cc1c8a7fa8d9ea3d6b359`. Remediation validation on
+`dev/release-readiness` additionally builds distributions, imports packaged
+modules with declared dependencies, and runs sanitized infrastructure tests. It
+does not execute calculator scripts, submit jobs, evaluate source expressions,
+or establish numerical or scientific validity.
 
 ## Definition of ready
 
@@ -30,76 +32,83 @@ a moving branch is not provenance.
 - Isolated wheel build: failed during package discovery because both `dev` and
   `pyflamestk` were interpreted as top-level packages.
 
+## Remediation evidence
+
+- Artifact-boundary commit: `64e7b50`.
+- Explicit packaging and CI commit: `ed0f248`.
+- Tracked inventory after cleanup: 808 files and 39,504,965 bytes.
+- Removed collection: 161 files and 250,836,932 bytes, verified against the
+  original commit and preserved in a private manifest-bound archive.
+- Package syntax: all 17 packaged Python modules parse and compile without a
+  `SyntaxWarning`.
+- Distribution boundary: 22 wheel files and 40 source-distribution files;
+  neither artifact contains `dev/`, `examples/`, offline bytes, or calculator
+  output.
+- Isolated imports: the base wheel imports without dependencies, and all 16
+  packaged submodules import with declared core and optional dependencies.
+- Bounded tests: six tests cover package selection, safe YAML loading, wheel
+  boundaries, and the PyFlamestk-specific offline staging policy.
+- CI: Python 3.11 and 3.14 passed tests, compilation, style checks, distribution
+  builds, boundary verification, dependency installation, and isolated module
+  imports in [run 35957687040](https://github.com/eragasa/pyflamestk/actions/runs/35957687040).
+
 ## Findings
 
-### Package boundary is not buildable
+### Package boundary is explicit and buildable
 
-Disposition: `MUST_FIX`
+Disposition: `NO_ACTION_REQUIRED`
 
-`setup.py` declares project metadata but does not declare packages,
-dependencies, supported Python versions, package data, entry points, or a build
-backend. Current setuptools aborts with:
+`pyproject.toml` selects only `pyflamestk`, defines Python 3.11 or newer, and
+uses a metadata-only `setup.py` compatibility shim. `MANIFEST.in`, wheel and
+source-distribution verifiers, and CI enforce the source and binary boundaries.
+Both distributions build in isolated environments. Examples, development
+material, offline bytes, and calculator output are absent from release
+artifacts.
 
-```text
-Multiple top-level packages discovered in a flat-layout: ['dev', 'pyflamestk'].
-```
+### Maintained-package syntax is complete
 
-The smallest correction is explicit modern build metadata that includes only
-the intended `pyflamestk` package. Examples, development material, tests,
-offline artifacts, and calculator output must not enter the wheel.
+Disposition: `NO_ACTION_REQUIRED`
 
-### Maintained-package syntax is incomplete
+The indentation defect in `pyflamestk/dakota_interface.py` is repaired. Unsafe
+unqualified YAML loading was replaced with `safe_load` and `safe_dump`, and
+invalid regular-expression escapes were corrected. Every packaged module now
+parses, compiles, and imports in CI.
 
-Disposition: `MUST_FIX`
+Three development or example scripts still fail static parsing. They are
+excluded from both distributions and classified with the unsupported examples
+below; no release gate silently treats them as maintained package code.
 
-Static AST parsing found an indentation error in
-`pyflamestk/dakota_interface.py:187`. Three additional source-bearing example
-or development scripts also fail parsing:
+### Runtime dependencies are declared by supported surface
 
-- `dev/2016_MRS_spring_pareto/buckingham_pareto_clean.py:348`
-- `dev/2016_MRS_spring_pareto/buckingham_pareto_iterate.py:349`
-- `examples/Ni_eam/eam_potential.py:17`
+Disposition: `NO_ACTION_REQUIRED`
 
-The package module must be repaired or explicitly excluded from the supported
-package boundary. Invalid development and example scripts must be classified as
-unsupported evidence or corrected in their owning scope; they must not silently
-pass a release gate.
+NumPy and SciPy are core requirements. Matplotlib and PyYAML are explicit
+`plot` and `dakota` extras and are combined by the `all` extra. Imports that
+occur only under excluded development and example trees do not become wheel
+requirements. CI installs all declared extras and imports every packaged
+module.
 
-### Runtime dependencies are undeclared
+### Test and CI contract is bounded
 
-Disposition: `MUST_FIX`
+Disposition: `NO_ACTION_REQUIRED`
 
-Static import inspection found external roots including NumPy, SciPy,
-Matplotlib, pandas, PyYAML, mpi4py, seaborn, and scikit-learn. `setup.py`
-declares none. The supported package surface must be selected before separating
-required dependencies from optional calculator, plotting, MPI, and development
-dependencies.
+Ordinary tests use only synthetic temporary repositories, manifests, and
+archives. CI compiles maintained source, runs the bounded tests, validates
+wheel and source-distribution contents, installs declared dependencies, and
+imports modules outside the checkout on Python 3.11 and 3.14. It never invokes
+a calculator or scheduler.
 
-### Test and CI contract is absent
+### Generated and restricted artifacts are outside the maintained tip
 
-Disposition: `MUST_FIX`
+Disposition: `NO_ACTION_REQUIRED`
 
-The repository has no CI workflow or modern test configuration. Existing tests
-include calculator outputs, pseudopotentials, scheduler output, and scripts that
-can launch external programs. Release verification must begin with static and
-pure in-memory tests. Calculator and scheduler execution must remain explicit,
-opt-in, and outside ordinary CI.
-
-### Generated and restricted artifacts were tracked
-
-Disposition: `MUST_FIX` — addressed in the current working tree but not yet
-committed.
-
-The audited commit tracks VASP pseudopotentials and generated outputs, LAMMPS
+Commit `64e7b50` removes VASP pseudopotentials and generated outputs, LAMMPS
 logs and restarts, large optimization datasets, scheduler output, editor state,
-and interpreter caches. The release-readiness working tree moved 161 files
-(250,836,932 bytes) to ignored `.offline/release-readiness/` staging.
-`OFFLINE_ARTIFACT_SHA256SUMS` preserves their original path identities, and
-`OFFLINE_ARTIFACTS.md` defines the boundary. Every staged byte was verified
-against the original `HEAD` content.
-
-Existing Git history is unchanged. No release should redistribute a
-pseudopotential without separately established authority.
+and interpreter caches from the maintained tip. The 161 original files remain
+in ignored local staging and a private offline archive.
+`OFFLINE_ARTIFACT_SHA256SUMS` preserves original paths and identities, while
+`OFFLINE_ARTIFACTS.md` records the archive identity and boundary. Existing Git
+history is unchanged. No release redistributes the removed pseudopotential.
 
 ### Machine-specific examples and effectful APIs remain
 
@@ -113,30 +122,25 @@ portable supported workflows, but they need not block a source baseline if:
 - examples and development trees are excluded from distributions;
 - ordinary tests never execute those paths;
 - the README clearly states the effect and portability boundary; and
-- supported APIs are narrowed before publication.
+- this source baseline is described as alpha research software without a
+  calculator, numerical-verification, or scientific-validation claim.
 
-Revisit this finding before any calculator-backed feature is presented as
-supported.
+Three excluded scripts remain syntactically invalid. Revisit this finding and
+repair or retire the relevant material before any example or calculator-backed
+feature is presented as supported.
 
 ## Recommended sequence
 
-1. Commit the reviewed offline-artifact boundary without rewriting history.
-2. Add explicit package metadata and build only the intended package.
-3. Define the supported module surface and resolve or exclude
-   `dakota_interface.py`.
-4. Declare core and optional dependencies from that supported surface.
-5. Add bounded static and pure in-memory tests with sanitized fixtures.
-6. Add CI for tests, package-boundary checks, syntax, and wheel isolation.
-7. Document execution, portability, numerical-verification, and
-   scientific-validation limits.
-8. Build and inspect the wheel in isolation.
-9. Select a release version and create an annotated tag only after all blocking
-   findings are resolved.
+The artifact boundary, packaging metadata, dependency declarations, bounded
+tests, CI, limitation documentation, and isolated distribution checks are
+complete. The remaining release operation is to merge or fast-forward the
+validated branch and create an annotated `v0.1.0` tag at the accepted commit.
+Tagging is a publication action, not a technical-review step.
 
 ## Review result
 
-Review outcome: `CHANGES_REQUIRED`
+Review outcome: `NO_BLOCKING_FINDINGS`
 
-The external-artifact boundary is now staged and verified. Packaging, syntax,
-dependency, test, CI, and support-surface work remains before a release tag is
-appropriate.
+The bounded source-baseline definition is met. This result does not claim that
+historical examples work, that calculators are available, or that any numerical
+or scientific result is verified or validated.
